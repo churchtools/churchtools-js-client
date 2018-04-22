@@ -1,0 +1,25 @@
+{
+    "name": "churchtools-js-client",
+    "version": "0.0.1",
+    "description": "Client bibliothec to interact with a ChurchTools Server.",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "webpack",
+        "prettier": "prettier --write \"src/**/*.js\""
+    },
+    "keywords": [
+        "churchtools",
+        "client"
+    ],
+    "author": "David Schilling <dschilling@churchtools.de>",
+    "license": "Apache-2.0",
+    "devDependencies": {
+        "babel-core": "^6.26.0",
+        "babel-loader": "^7.1.4",
+        "babel-preset-env": "^1.6.1",
+        "prettier": "^1.12.1",
+        "webpack": "^4.6.0",
+        "webpack-cli": "^2.0.15"
+    }
+}
