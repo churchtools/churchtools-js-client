@@ -1,3 +1,3 @@
-export default function foo() {
-    console.log();
-}
+import * as churchtoolsClient from './churchtoolsClient';
+
+export { churchtoolsClient };
