@@ -12,7 +12,7 @@ const setBaseUrl = baseUrl => {
 };
 
 const buildOldRequestObject = (func, params) => {
-    const requestBody = Object.assign({}, params, { func: func });
+    return Object.assign({}, params, { func: func });
 };
 
 /**
