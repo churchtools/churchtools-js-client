@@ -11,6 +11,18 @@ const setBaseUrl = baseUrl => {
     churchToolsBaseUrl = baseUrl.replace(/\/$/, '');
 };
 
+const enableLogging = () => {
+    axios.interceptors.request.use(request => {
+        console.log('Starting Request', request);
+        return request;
+    });
+
+    axios.interceptors.response.use(response => {
+        console.log('Response:', response);
+        return response;
+    });
+};
+
 const buildOldRequestObject = (func, params) => {
     return Object.assign({}, params, { func: func });
 };
@@ -59,4 +71,4 @@ const get = uri => {
     });
 };
 
-export { oldApi, get, setBaseUrl };
+export { oldApi, get, setBaseUrl, enableLogging };
