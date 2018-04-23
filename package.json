@@ -2,7 +2,7 @@
     "name": "churchtools-js-client",
     "version": "0.0.1",
     "description": "Client bibliothec to interact with a ChurchTools Server.",
-    "main": "src/index.js",
+    "main": "dist/churchtools-client.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "webpack",
