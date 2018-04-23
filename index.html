@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beispiel Benutzung</title>
+</head>
+
+<body>
+    <form>
+        ChurchTools URL:
+        <br>
+        <input id="url" type="text" value="https://testdavid.church.tools" name="url">
+        <br>
+        <button id="whoami" type="submit">WhoAmI</button>
+    </form>
+    Ausgabe
+    <div id="content">
+
+    </div>
+    <script src="dist/churchtools-client.js"></script>
+    <script>
+        const client = churchtoolsClient.churchtoolsClient;
+        const api = churchtoolsClient.churchtoolsApi;
+
+        var elem = document.getElementById('whoami');
+        elem.addEventListener('click', (e) => {
+            setUrl();
+            e.preventDefault();
+            api.whoami().then(user => {
+                addContent(user);
+            });
+        });
+
+        function setUrl() {
+            const urlInput = document.getElementById('url');
+            const url = urlInput.value;
+            client.setBaseUrl(url);
+        }
+
+        function addContent(object) {
+            console.log(object);
+            var paragraph = document.getElementById("content");
+            var text = document.createTextNode(JSON.stringify(object));
+
+            paragraph.appendChild(text);
+
+        }
+    </script>
+</body>
+
+</html>
