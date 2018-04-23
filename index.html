@@ -13,25 +13,60 @@
         <br>
         <input id="url" type="text" value="https://testdavid.church.tools" name="url">
         <br>
-        <button id="whoami" type="submit">WhoAmI</button>
+        <button id="whoami">WhoAmI</button>
+        <button id="masterdata">masterdata churchdb</button>
+        <br> Username
+        <br>
+        <input id="username" type="text" name="username">
+        <br>Passwort
+        <br>
+        <input id="password" type="password" name="password">
+        <button id="login">login</button>
     </form>
-    Ausgabe
+    <h1>Ausgabe</h1>
     <div id="content">
-
     </div>
+    <h1>Fehler</h1>
+    <div id="error">
+    </div>
+
     <script src="dist/churchtools-client.js"></script>
     <script>
         const client = churchtoolsClient.churchtoolsClient;
         const api = churchtoolsClient.churchtoolsApi;
 
-        var elem = document.getElementById('whoami');
-        elem.addEventListener('click', (e) => {
+        document.getElementById('whoami').addEventListener('click', (e) => {
             setUrl();
             e.preventDefault();
             api.whoami().then(user => {
                 addContent(user);
+            }).catch(error => {
+                addError(error);
             });
         });
+
+        document.getElementById('masterdata').addEventListener('click', (e) => {
+            setUrl();
+            e.preventDefault();
+            api.masterdata('churchdb').then(masterdata => {
+                addContent(masterdata);
+            }).catch(error => {
+                addError(error);
+            });
+        });
+
+        document.getElementById('login').addEventListener('click', (e) => {
+            e.preventDefault();
+            setUrl();
+            const user = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            api.login(user, password).then(login => {
+                addContent(login);
+            }).catch(error => {
+                addError(error);
+            });
+        });
+
 
         function setUrl() {
             const urlInput = document.getElementById('url');
@@ -42,6 +77,15 @@
         function addContent(object) {
             console.log(object);
             var paragraph = document.getElementById("content");
+            var text = document.createTextNode(JSON.stringify(object));
+
+            paragraph.appendChild(text);
+
+        }
+
+        function addError(object) {
+            console.log(object);
+            var paragraph = document.getElementById("error");
             var text = document.createTextNode(JSON.stringify(object));
 
             paragraph.appendChild(text);
