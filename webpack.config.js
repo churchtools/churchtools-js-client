@@ -5,7 +5,8 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'churchtools-client.js',
-        library: 'churchtoolsClient'
+        library: 'churchtoolsClient',
+        libraryTarget: 'umd'
     },
     mode: 'production',
     module: {
