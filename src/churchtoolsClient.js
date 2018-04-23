@@ -36,15 +36,27 @@ const oldApi = (module, func, params) => {
                 if (response.data.status === 'success') {
                     resolve(response.data.data);
                 } else {
-                    reject(response);
+                    reject({ response: response });
                 }
+            })
+            .catch(error => {
+                reject(error);
             });
     });
 };
 
 const get = uri => {
     const url = `${churchToolsBaseUrl}/api${uri}`;
-    return axios.get(url);
+    return new Promise((resolve, reject) => {
+        axios
+            .get(url)
+            .then(response => {
+                resolve(response.data);
+            })
+            .catch(error => {
+                reject(error);
+            });
+    });
 };
 
 export { oldApi, get, setBaseUrl };

@@ -1,3 +1,4 @@
 import * as churchtoolsClient from './churchtoolsClient';
+import * as churchtoolsApi from './churchtoolsApi';
 
-export { churchtoolsClient };
+export { churchtoolsClient, churchtoolsApi };
