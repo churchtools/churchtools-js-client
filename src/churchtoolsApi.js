@@ -13,7 +13,7 @@ const masterdata = module => {
 
 const whoami = (loginstring = null, personId = null) => {
     if (loginstring) {
-        return get(`/whoami?loginstr=${loginstring}&id=${personId}`);
+        return get(`/whoami?loginstr=${loginstring}&id=${personId}&no_url_rewrite=true`);
     }
     return get('/whoami');
 };
