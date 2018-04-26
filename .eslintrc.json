@@ -8,32 +8,18 @@
         "sourceType": "module"
     },
     "globals": {
-        "Laravel": true,
+        "test": true,
+        "beforeEach": true,
+        "afterEach": true,
+        "jest": true,
         "expect": true,
-        "it": true,
-        "require": true,
         "describe": true
-     },
+    },
     "rules": {
-        "indent": [
-            "error",
-            4
-        ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "quotes": [
-            "error",
-            "single"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ],
-        "max-len": [
-            "error",
-            120
-        ]
+        "indent": ["error", 4],
+        "linebreak-style": ["error", "unix"],
+        "quotes": ["error", "single"],
+        "semi": ["error", "always"],
+        "max-len": ["error", 120]
     }
 }

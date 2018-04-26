@@ -5,7 +5,6 @@ let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 let tryingToLoginAgain = false;
 const unauthenticatedCallbacks = [];
-let debugging = false;
 
 /**
  * Sets the default ChurchTools url.
@@ -17,7 +16,6 @@ const setBaseUrl = baseUrl => {
 };
 
 const enableLogging = () => {
-    debugging = true;
     axios.interceptors.request.use(request => {
         log('Starting Request', request);
         return request;
@@ -55,7 +53,6 @@ const oldApi = (module, func, params) => {
                 params: buildOldRequestObject(func, params)
             })
             .then(response => {
-                console.log('old', response);
                 if (response.data.status === 'success') {
                     resolve(response.data.data);
                 } else {
