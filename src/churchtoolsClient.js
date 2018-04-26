@@ -3,6 +3,7 @@ import axios from 'axios';
 let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 let tryingToLoginAgain = false;
+const unauthenticatedCallbacks = [];
 
 /**
  * Sets the default ChurchTools url.
@@ -78,6 +79,12 @@ const get = uri => {
     });
 };
 
+const notifyUnauthenticated = () => {
+    unauthenticatedCallbacks.forEach(callback => {
+        callback();
+    });
+};
+
 const retryWithLogin = (config, loginToken, personId, resolve, reject, previousError) => {
     tryingToLoginAgain = true;
     get(`/whoami?login_token=${loginToken}&user_id=${personId}&no_url_rewrite=true`)
@@ -91,6 +98,7 @@ const retryWithLogin = (config, loginToken, personId, resolve, reject, previousE
                 .catch(error => {
                     tryingToLoginAgain = false;
                     reject(error);
+                    notifyUnauthenticated();
                 });
         })
         .catch(() => {
@@ -99,23 +107,18 @@ const retryWithLogin = (config, loginToken, personId, resolve, reject, previousE
         });
 };
 
-const setUnauthorizedInterceptor = (loginToken = null, personId) => {
+const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
     if (unauthorizedInterceptor) {
         axios.interceptors.response.eject(unauthorizedInterceptor);
     }
     unauthorizedInterceptor = axios.interceptors.response.use(
         response => {
-            return new Promise((resolve, reject) => {
-                if (response.data.message === 'Session expired!') {
-                    if (tryingToLoginAgain) {
-                        tryingToLoginAgain = false;
-                        reject({ response: response });
-                    }
-                    retryWithLogin(response.config, loginToken, personId, resolve, reject, { response: response });
-                } else {
-                    resolve(response);
-                }
-            });
+            if (response.data.message === 'Session expired!') {
+                response.status = 401;
+                Promise.reject({ response: response, config: response.config });
+            } else {
+                Promise.resolve(response);
+            }
         },
         error => {
             return new Promise((resolve, reject) => {
@@ -124,7 +127,11 @@ const setUnauthorizedInterceptor = (loginToken = null, personId) => {
                     reject(error);
                 }
                 if (error.response && error.response.status === 401) {
-                    retryWithLogin(error.config, loginToken, personId, resolve, reject, error);
+                    if (loginToken) {
+                        retryWithLogin(error.config, loginToken, personId, resolve, reject, error);
+                    } else {
+                        notifyUnauthenticated();
+                    }
                 } else {
                     reject(error);
                 }
@@ -133,4 +140,18 @@ const setUnauthorizedInterceptor = (loginToken = null, personId) => {
     );
 };
 
-export { oldApi, get, setBaseUrl, enableLogging, setUnauthorizedInterceptor, enableCrossOriginRequests };
+setUnauthorizedInterceptor();
+
+const onUnauthenticated = callback => {
+    unauthenticatedCallbacks.push(callback);
+};
+
+export {
+    oldApi,
+    get,
+    setBaseUrl,
+    enableLogging,
+    setUnauthorizedInterceptor,
+    enableCrossOriginRequests,
+    onUnauthenticated
+};
