@@ -1,9 +1,11 @@
 import axios from 'axios';
+import { log } from './logging';
 
 let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 let tryingToLoginAgain = false;
 const unauthenticatedCallbacks = [];
+let debugging = false;
 
 /**
  * Sets the default ChurchTools url.
@@ -15,13 +17,14 @@ const setBaseUrl = baseUrl => {
 };
 
 const enableLogging = () => {
+    debugging = true;
     axios.interceptors.request.use(request => {
-        console.log('Starting Request', request);
+        log('Starting Request', request);
         return request;
     });
 
     axios.interceptors.response.use(response => {
-        console.log('Response:', response);
+        log('Response:', response);
         return response;
     });
 };
@@ -87,16 +90,19 @@ const notifyUnauthenticated = () => {
 
 const retryWithLogin = (config, loginToken, personId, resolve, reject, previousError) => {
     tryingToLoginAgain = true;
+    log('Trying transparent relogin with login token');
     get(`/whoami?login_token=${loginToken}&user_id=${personId}&no_url_rewrite=true`)
         .then(() => {
             axios
                 .request(config)
                 .then(response => {
                     tryingToLoginAgain = false;
+                    log('Successfully logged in again with login token');
                     resolve(response);
                 })
                 .catch(error => {
                     tryingToLoginAgain = false;
+                    log('Failed to login with login token');
                     reject(error);
                     notifyUnauthenticated();
                 });
@@ -127,6 +133,7 @@ const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
                     reject(error);
                 }
                 if (error.response && error.response.status === 401) {
+                    log('Got 401 session expired');
                     if (loginToken) {
                         retryWithLogin(error.config, loginToken, personId, resolve, reject, error);
                     } else {
