@@ -1,0 +1,10 @@
+image: node:8
+
+before_script:
+- bash ci/docker_install.sh > /dev/null
+
+test:app:
+  script:
+  - npm test
+
+
