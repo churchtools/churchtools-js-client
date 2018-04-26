@@ -11,7 +11,7 @@
     <form>
         ChurchTools URL:
         <br>
-        <input id="url" type="text" value="https://testdavid.church.tools" name="url">
+        <input id="url" type="text" value="http://localhost:8080" name="url">
         <br>
         <button id="whoami">WhoAmI</button>
         <button id="masterdata">masterdata churchdb</button>
@@ -22,6 +22,7 @@
         <br>
         <input id="password" type="password" name="password">
         <button id="login">login</button>
+        <button id="clear">clear</button>
     </form>
     <h1>Ausgabe</h1>
     <div id="content">
@@ -30,10 +31,13 @@
     <div id="error">
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
     <script src="dist/churchtools-client.js"></script>
     <script>
         const client = churchtoolsClient.churchtoolsClient;
         const api = churchtoolsClient.churchtoolsApi;
+        client.enableCrossOriginRequests();
 
         document.getElementById('whoami').addEventListener('click', (e) => {
             setUrl();
@@ -62,9 +66,21 @@
             const password = document.getElementById('password').value;
             api.login(user, password).then(login => {
                 addContent(login);
+                api.whoami().then((user) => {
+                    addContent(user);
+                    api.logintoken(user.id).then((logintoken) => {
+                        addContent(logintoken);
+                        client.setUnauthorizedInterceptor(logintoken, user.id);
+                    }).catch(addError);
+                }).catch(addError);
             }).catch(error => {
                 addError(error);
             });
+        });
+        $('#clear').click((e) => {
+            e.preventDefault();
+            $('#content').html('');
+            $('#error').html('');
         });
 
 
@@ -76,20 +92,13 @@
 
         function addContent(object) {
             console.log(object);
-            var paragraph = document.getElementById("content");
-            var text = document.createTextNode(JSON.stringify(object));
-
-            paragraph.appendChild(text);
+            $('#content').append('<div>' + JSON.stringify(object) + '</div>');
 
         }
 
         function addError(object) {
             console.log(object);
-            var paragraph = document.getElementById("error");
-            var text = document.createTextNode(JSON.stringify(object));
-
-            paragraph.appendChild(text);
-
+            $('#error').append('<div>' + JSON.stringify(object) + '</div>');
         }
     </script>
 </body>
