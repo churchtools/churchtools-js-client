@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 let churchToolsBaseUrl = null;
+let unauthorizedInterceptor = null;
+let tryingToLoginAgain = false;
 
 /**
  * Sets the default ChurchTools url.
@@ -21,6 +23,10 @@ const enableLogging = () => {
         console.log('Response:', response);
         return response;
     });
+};
+
+const enableCrossOriginRequests = () => {
+    axios.defaults.withCredentials = true;
 };
 
 const buildOldRequestObject = (func, params) => {
@@ -45,6 +51,7 @@ const oldApi = (module, func, params) => {
                 params: buildOldRequestObject(func, params)
             })
             .then(response => {
+                console.log('old', response);
                 if (response.data.status === 'success') {
                     resolve(response.data.data);
                 } else {
@@ -71,4 +78,59 @@ const get = uri => {
     });
 };
 
-export { oldApi, get, setBaseUrl, enableLogging };
+const retryWithLogin = (config, loginToken, personId, resolve, reject, previousError) => {
+    tryingToLoginAgain = true;
+    get(`/whoami?login_token=${loginToken}&user_id=${personId}&no_url_rewrite=true`)
+        .then(() => {
+            axios
+                .request(config)
+                .then(response => {
+                    tryingToLoginAgain = false;
+                    resolve(response);
+                })
+                .catch(error => {
+                    tryingToLoginAgain = false;
+                    reject(error);
+                });
+        })
+        .catch(() => {
+            tryingToLoginAgain = false;
+            reject(previousError);
+        });
+};
+
+const setUnauthorizedInterceptor = (loginToken = null, personId) => {
+    if (unauthorizedInterceptor) {
+        axios.interceptors.response.eject(unauthorizedInterceptor);
+    }
+    unauthorizedInterceptor = axios.interceptors.response.use(
+        response => {
+            return new Promise((resolve, reject) => {
+                if (response.data.message === 'Session expired!') {
+                    if (tryingToLoginAgain) {
+                        tryingToLoginAgain = false;
+                        reject({ response: response });
+                    }
+                    retryWithLogin(response.config, loginToken, personId, resolve, reject, { response: response });
+                } else {
+                    resolve(response);
+                }
+            });
+        },
+        error => {
+            return new Promise((resolve, reject) => {
+                if (tryingToLoginAgain) {
+                    tryingToLoginAgain = false;
+                    reject(error);
+                }
+                if (error.response && error.response.status === 401) {
+                    retryWithLogin(error.config, loginToken, personId, resolve, reject, error);
+                } else {
+                    reject(error);
+                }
+            });
+        }
+    );
+};
+
+export { oldApi, get, setBaseUrl, enableLogging, setUnauthorizedInterceptor, enableCrossOriginRequests };
