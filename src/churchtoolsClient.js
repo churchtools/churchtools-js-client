@@ -116,9 +116,9 @@ const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
         response => {
             if (response.data.message === 'Session expired!') {
                 response.status = 401;
-                Promise.reject({ response: response, config: response.config });
+                return Promise.reject({ response: response, config: response.config });
             } else {
-                Promise.resolve(response);
+                return Promise.resolve(response);
             }
         },
         error => {
@@ -148,11 +148,4 @@ const onUnauthenticated = callback => {
     unauthenticatedCallbacks.push(callback);
 };
 
-export {
-    oldApi,
-    get,
-    setBaseUrl,
-    setUnauthorizedInterceptor,
-    enableCrossOriginRequests,
-    onUnauthenticated
-};
+export { oldApi, get, setBaseUrl, setUnauthorizedInterceptor, enableCrossOriginRequests, onUnauthenticated };
