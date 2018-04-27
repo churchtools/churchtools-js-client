@@ -22,6 +22,7 @@
         <br>
         <input id="password" type="password" name="password">
         <button id="login">login</button>
+        <button id="logout">logout</button>
         <button id="clear">clear</button>
     </form>
     <h1>Ausgabe</h1>
@@ -38,6 +39,7 @@
         const client = churchtoolsClient.churchtoolsClient;
         const api = churchtoolsClient.churchtoolsApi;
         client.enableCrossOriginRequests();
+        churchtoolsClient.activateLogging();
 
         document.getElementById('whoami').addEventListener('click', (e) => {
             setUrl();
@@ -76,6 +78,10 @@
             }).catch(error => {
                 addError(error);
             });
+        });
+        document.getElementById('logout').addEventListener('click', (e) => {
+            e.preventDefault();
+            api.logout();
         });
         $('#clear').click((e) => {
             e.preventDefault();
