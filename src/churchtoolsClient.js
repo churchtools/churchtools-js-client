@@ -152,7 +152,6 @@ export {
     oldApi,
     get,
     setBaseUrl,
-    enableLogging,
     setUnauthorizedInterceptor,
     enableCrossOriginRequests,
     onUnauthenticated
