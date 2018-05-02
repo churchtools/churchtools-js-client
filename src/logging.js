@@ -10,7 +10,11 @@ const deactivateLoggging = () => {
 
 const log = (message, message2) => {
     if (logging) {
-        console.log('ChurchTools Client:', message, message2); //eslint-disable-line no-console
+        if (message2) {
+            console.log('ChurchTools Client:', message, message2); //eslint-disable-line no-console
+        } else {
+            console.log('ChurchTools Client:', message); //eslint-disable-line no-console
+        }
     }
 };
 

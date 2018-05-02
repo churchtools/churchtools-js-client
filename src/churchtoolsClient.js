@@ -97,7 +97,7 @@ const retryWithLogin = (config, loginToken, personId, resolve, reject, previousE
                 })
                 .catch(error => {
                     tryingToLoginAgain = false;
-                    log('Failed to login with login token');
+                    log('Failed to login with login token', error);
                     reject(error);
                     notifyUnauthenticated();
                 });
@@ -128,7 +128,7 @@ const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
                     reject(error);
                 }
                 if (error.response && error.response.status === 401) {
-                    log('Got 401 session expired');
+                    log('Got 401 session expired', error);
                     if (loginToken) {
                         retryWithLogin(error.config, loginToken, personId, resolve, reject, error);
                     } else {
