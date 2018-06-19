@@ -171,7 +171,8 @@ const validChurchToolsUrl = url => {
                     });
                 }
             })
-            .catch(() => {
+            .catch(error => {
+                log('Error on checking url', error);
                 reject({
                     message: `The url ${url} does not point to a valid ChurchTools installation.`,
                     messageKey: 'churchtools.url.invalid',
