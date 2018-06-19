@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { log } from './logging';
+import { toCorrectChurchToolsUrl } from './urlHelper';
 
 let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
@@ -150,7 +151,7 @@ const onUnauthenticated = callback => {
 };
 
 const validChurchToolsUrl = url => {
-    const infoEndpoint = `${url}/api/info`;
+    const infoEndpoint = `${toCorrectChurchToolsUrl(url)}/api/info`;
     return new Promise((resolve, reject) => {
         axios
             .get(infoEndpoint)
