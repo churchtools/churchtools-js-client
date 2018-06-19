@@ -5,6 +5,7 @@ let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 let tryingToLoginAgain = false;
 const unauthenticatedCallbacks = [];
+const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31190;
 
 /**
  * Sets the default ChurchTools url.
@@ -148,4 +149,45 @@ const onUnauthenticated = callback => {
     unauthenticatedCallbacks.push(callback);
 };
 
-export { oldApi, get, setBaseUrl, setUnauthorizedInterceptor, enableCrossOriginRequests, onUnauthenticated };
+const validChurchToolsUrl = url => {
+    const infoEndpoint = `${url}/api/info`;
+    return new Promise((resolve, reject) => {
+        axios
+            .get(infoEndpoint)
+            .then(response => {
+                const build = parseInt(response.data.build);
+                if (build >= 31190) {
+                    resolve();
+                } else {
+                    reject({
+                        message: `The url ${url} points to a ChurchTools Installation, but its version is too old.
+                        At least build ${MINIMAL_CHURCHTOOLS_BUILD_VERSION} is required.`,
+                        messageKey: 'churchtools.url.invalid.old',
+                        args: {
+                            url: url,
+                            minimalChurchToolsBuildVersion: MINIMAL_CHURCHTOOLS_BUILD_VERSION
+                        }
+                    });
+                }
+            })
+            .catch(() => {
+                reject({
+                    message: `The url ${url} does not point to a valid ChurchTools installation.`,
+                    messageKey: 'churchtools.url.invalid',
+                    args: {
+                        url: url
+                    }
+                });
+            });
+    });
+};
+
+export {
+    oldApi,
+    get,
+    setBaseUrl,
+    setUnauthorizedInterceptor,
+    enableCrossOriginRequests,
+    onUnauthenticated,
+    validChurchToolsUrl
+};

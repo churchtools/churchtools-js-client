@@ -15,6 +15,7 @@
         <br>
         <button id="whoami">WhoAmI</button>
         <button id="masterdata">masterdata churchdb</button>
+        <button id="validchurchtoolsurl">is Valid ChurchTools Url</button>
         <br> Username
         <br>
         <input id="username" type="text" name="username">
@@ -56,6 +57,16 @@
             e.preventDefault();
             api.masterdata('churchdb').then(masterdata => {
                 addContent(masterdata);
+            }).catch(error => {
+                addError(error);
+            });
+        });
+
+        document.getElementById('validchurchtoolsurl').addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = document.getElementById('url').value;
+            client.validChurchToolsUrl(url).then(() => {
+                addContent(url + ' is a valid ChurchTools Url');
             }).catch(error => {
                 addError(error);
             });
