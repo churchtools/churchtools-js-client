@@ -10,7 +10,10 @@
         "prettier": "prettier --write \"src/**/*.js\"",
         "eslint": "eslint src/**/*.js"
     },
-    "keywords": ["churchtools", "client"],
+    "keywords": [
+        "churchtools",
+        "client"
+    ],
     "author": "David Schilling <dschilling@churchtools.de>",
     "license": "Apache-2.0",
     "devDependencies": {
