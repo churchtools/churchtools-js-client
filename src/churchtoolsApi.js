@@ -30,4 +30,15 @@ const logintoken = personId => {
     return get(`/persons/${personId}/logintoken`);
 };
 
-export { login, logout, whoami, personEvents, masterdata, logintoken };
+const person = personId => {
+    return get(`/persons/${personId}`);
+};
+
+const services = () => {
+    return get('/services');
+};
+const serviceGroups = () => {
+    return get('/servicegroups');
+};
+
+export { login, logout, whoami, personEvents, masterdata, logintoken, person, services, serviceGroups };
