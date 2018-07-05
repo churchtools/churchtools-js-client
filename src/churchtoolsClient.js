@@ -71,7 +71,7 @@ const get = uri => {
         axios
             .get(url)
             .then(response => {
-                resolve(response.data);
+                resolve(response.data.data);
             })
             .catch(error => {
                 reject(error);
