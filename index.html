@@ -13,11 +13,9 @@
         <br>
         <input id="url" type="text" value="http://localhost:8080" name="url">
         <br>
-        <button id="whoami">WhoAmI</button>
-        <button id="masterdata">masterdata churchdb</button>
-        <button id="validchurchtoolsurl">is Valid ChurchTools Url</button>
-        <br> Username
-        <br>
+        <div id="api-requests">
+
+        </div>
         <input id="username" type="text" name="username">
         <br>Passwort
         <br>
@@ -42,35 +40,46 @@
         client.enableCrossOriginRequests();
         churchtoolsClient.activateLogging();
 
-        document.getElementById('whoami').addEventListener('click', (e) => {
-            setUrl();
-            e.preventDefault();
-            api.whoami().then(user => {
-                addContent(user);
-            }).catch(error => {
-                addError(error);
+        const apiRequests = {
+            'whoami': () => {
+                return api.whoami();
+            },
+            'masterdata': () => {
+                return api.masterdata('churchdb');
+            },
+            'validchurchtoolsurl': () => {
+                const url = document.getElementById('url').value;
+                return client.validChurchToolsUrl(url);
+            },
+            'person': () => {
+                return api.person(1);
+            },
+            'services': () => {
+                return api.services();
+            },
+            'serviceGroups': () => {
+                return api.serviceGroups();
+            },
+        };
+
+        Object.keys(apiRequests).forEach((apiRequestKey) => {
+            const apiRequestsDiv = document.getElementById('api-requests');
+            const button = document.createElement("button");
+            button.id = apiRequestKey;
+            button.innerHTML = apiRequestKey;
+            apiRequestsDiv.appendChild(button);
+
+            button.addEventListener('click', (e) => {
+                setUrl();
+                e.preventDefault();
+                apiRequests[apiRequestKey]().then((content) => {
+                    addContent(content);
+                }).catch(error => {
+                    addError(error);
+                });
             });
         });
 
-        document.getElementById('masterdata').addEventListener('click', (e) => {
-            setUrl();
-            e.preventDefault();
-            api.masterdata('churchdb').then(masterdata => {
-                addContent(masterdata);
-            }).catch(error => {
-                addError(error);
-            });
-        });
-
-        document.getElementById('validchurchtoolsurl').addEventListener('click', (e) => {
-            e.preventDefault();
-            const url = document.getElementById('url').value;
-            client.validChurchToolsUrl(url).then(() => {
-                addContent(url + ' is a valid ChurchTools Url');
-            }).catch(error => {
-                addError(error);
-            });
-        });
 
         document.getElementById('login').addEventListener('click', (e) => {
             e.preventDefault();
