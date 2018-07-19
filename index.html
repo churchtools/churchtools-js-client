@@ -60,6 +60,9 @@
             'serviceGroups': () => {
                 return api.serviceGroups();
             },
+            'personEvents': () => {
+                return api.personEvents(1);
+            },
         };
 
         Object.keys(apiRequests).forEach((apiRequestKey) => {
