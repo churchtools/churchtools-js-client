@@ -1,4 +1,4 @@
-import { oldApi, get } from './churchtoolsClient';
+import { oldApi, get, post, put, deleteApi } from './churchtoolsClient';
 
 const login = (username, password) => {
     return oldApi('login/ajax', 'login', {
@@ -41,4 +41,28 @@ const serviceGroups = () => {
     return get('/servicegroups');
 };
 
-export { login, logout, whoami, personEvents, masterdata, logintoken, person, services, serviceGroups };
+const acceptServiceRequest = (personId, serviceRequestId, serviceId) => {
+    const body = {
+        serviceId: serviceId,
+        agreed: true
+    };
+    return put(`/persons/${personId}/servicerequests/${serviceRequestId}`, body);
+};
+
+const declineServiceRequest = (personId, serviceRequestId) => {
+    return deleteApi(`/persons/${personId}/servicerequests/${serviceRequestId}`);
+};
+
+export {
+    login,
+    logout,
+    whoami,
+    personEvents,
+    masterdata,
+    logintoken,
+    person,
+    services,
+    serviceGroups,
+    acceptServiceRequest,
+    declineServiceRequest
+};

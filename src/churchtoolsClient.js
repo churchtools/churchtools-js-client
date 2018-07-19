@@ -65,13 +65,55 @@ const oldApi = (module, func, params) => {
     });
 };
 
+const buildUrl = uri => {
+    return `${churchToolsBaseUrl}/api${uri}`;
+};
+
 const get = uri => {
-    const url = `${churchToolsBaseUrl}/api${uri}`;
     return new Promise((resolve, reject) => {
         axios
-            .get(url)
+            .get(buildUrl(uri))
             .then(response => {
                 resolve(response.data.data);
+            })
+            .catch(error => {
+                reject(error);
+            });
+    });
+};
+
+const put = (uri, data) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .put(buildUrl(uri), data)
+            .then(response => {
+                resolve(response.data);
+            })
+            .catch(error => {
+                reject(error);
+            });
+    });
+};
+
+const post = (uri, data = {}) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .put(buildUrl(uri), data)
+            .then(response => {
+                resolve(response.data);
+            })
+            .catch(error => {
+                reject(error);
+            });
+    });
+};
+
+const deleteApi = (uri, data = {}) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .put(buildUrl(uri), data)
+            .then(response => {
+                resolve(response.data);
             })
             .catch(error => {
                 reject(error);
@@ -187,6 +229,9 @@ const validChurchToolsUrl = url => {
 export {
     oldApi,
     get,
+    put,
+    post,
+    deleteApi,
     setBaseUrl,
     setUnauthorizedInterceptor,
     enableCrossOriginRequests,
