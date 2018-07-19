@@ -111,7 +111,7 @@ const post = (uri, data = {}) => {
 const deleteApi = (uri, data = {}) => {
     return new Promise((resolve, reject) => {
         axios
-            .put(buildUrl(uri), data)
+            .delete(buildUrl(uri), data)
             .then(response => {
                 resolve(response.data);
             })
