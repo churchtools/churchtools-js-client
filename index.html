@@ -63,6 +63,12 @@
             'personEvents': () => {
                 return api.personEvents(1);
             },
+            'acceptServiceRequest': () => {
+                return api.acceptServiceRequest(1, 1, 1);
+            },
+            'declineServiceRequest': () => {
+                return api.declineServiceRequest(1, 1, 1);
+            },
         };
 
         Object.keys(apiRequests).forEach((apiRequestKey) => {
