@@ -35,6 +35,10 @@ const buildOldRequestObject = (func, params) => {
     return Object.assign({}, params, { func: func });
 };
 
+const responseToData = response => {
+    return response.data.data ? response.data.data : response.data;
+};
+
 /**
  * Calls the old ChurchTools Api
  *
@@ -54,7 +58,7 @@ const oldApi = (module, func, params) => {
             })
             .then(response => {
                 if (response.data.status === 'success') {
-                    resolve(response.data.data);
+                    resolve(responseToData(response));
                 } else {
                     reject({ response: response });
                 }
@@ -74,7 +78,7 @@ const get = uri => {
         axios
             .get(buildUrl(uri))
             .then(response => {
-                resolve(response.data.data);
+                resolve(responseToData(response));
             })
             .catch(error => {
                 reject(error);
