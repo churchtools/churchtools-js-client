@@ -207,14 +207,21 @@ const validChurchToolsUrl = url => {
                 const build = parseInt(response.data.build);
                 if (build >= 31190) {
                     resolve();
-                } else {
+                } else if (response.data.buid) {
                     reject({
-                        message: `The url ${url} points to a ChurchTools Installation, but its version is too old.
-                        At least build ${MINIMAL_CHURCHTOOLS_BUILD_VERSION} is required.`,
+                        message: `The url ${url} points to a ChurchTools Installation, but its version is too old. At least build ${MINIMAL_CHURCHTOOLS_BUILD_VERSION} is required.`,
                         messageKey: 'churchtools.url.invalid.old',
                         args: {
                             url: url,
                             minimalChurchToolsBuildVersion: MINIMAL_CHURCHTOOLS_BUILD_VERSION
+                        }
+                    });
+                } else {
+                    reject({
+                        message: `The url ${url} does not point to a valid ChurchTools installation.`,
+                        messageKey: 'churchtools.url.invalid',
+                        args: {
+                            url: url
                         }
                     });
                 }
