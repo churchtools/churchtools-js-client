@@ -52,7 +52,7 @@ const oldApi = (module, func, params) => {
     return new Promise((resolve, reject) => {
         axios
             .request({
-                url: `${churchToolsBaseUrl}?q=${module}`,
+                url: `${churchToolsBaseUrl}/?q=${module}`,
                 method: 'POST',
                 params: buildOldRequestObject(func, params)
             })
