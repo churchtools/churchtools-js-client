@@ -39,6 +39,9 @@
         const api = churchtoolsClient.churchtoolsApi;
         client.enableCrossOriginRequests();
         churchtoolsClient.activateLogging();
+        client.onUnauthenticated(() => {
+            alert('unauthorized');
+        });
 
         const apiRequests = {
             'whoami': () => {
