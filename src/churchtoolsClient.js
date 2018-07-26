@@ -126,6 +126,7 @@ const deleteApi = (uri, data = {}) => {
 };
 
 const notifyUnauthenticated = () => {
+    log('Notifying unauthenticated.');
     unauthenticatedCallbacks.forEach(callback => {
         callback();
     });
@@ -173,6 +174,7 @@ const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
             return new Promise((resolve, reject) => {
                 if (tryingToLoginAgain) {
                     tryingToLoginAgain = false;
+                    notifyUnauthenticated();
                     reject(error);
                 }
                 if (error.response && error.response.status === 401) {
