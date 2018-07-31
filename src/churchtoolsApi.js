@@ -1,9 +1,16 @@
 import { oldApi, get, post, put, deleteApi } from './churchtoolsClient';
 
 const login = (username, password) => {
-    return oldApi('login/ajax', 'login', {
-        email: username,
+    return post('/login', {
+        username: username,
         password: password
+    });
+};
+
+const totp = (code, personId) => {
+    return post('/login/totp', {
+        code,
+        personId
     });
 };
 

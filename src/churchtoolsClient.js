@@ -102,7 +102,7 @@ const put = (uri, data) => {
 const post = (uri, data = {}) => {
     return new Promise((resolve, reject) => {
         axios
-            .put(buildUrl(uri), data)
+            .post(buildUrl(uri), data)
             .then(response => {
                 resolve(response.data);
             })
