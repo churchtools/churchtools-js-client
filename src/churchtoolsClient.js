@@ -91,7 +91,7 @@ const put = (uri, data) => {
         axios
             .put(buildUrl(uri), data)
             .then(response => {
-                resolve(response.data);
+                resolve(responseToData(response.data));
             })
             .catch(error => {
                 reject(error);
@@ -104,7 +104,7 @@ const post = (uri, data = {}) => {
         axios
             .post(buildUrl(uri), data)
             .then(response => {
-                resolve(response.data);
+                resolve(responseToData(response.data));
             })
             .catch(error => {
                 reject(error);
