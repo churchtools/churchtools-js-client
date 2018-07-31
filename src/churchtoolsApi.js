@@ -62,6 +62,7 @@ const declineServiceRequest = (personId, serviceRequestId) => {
 
 export {
     login,
+    totp,
     logout,
     whoami,
     personEvents,
