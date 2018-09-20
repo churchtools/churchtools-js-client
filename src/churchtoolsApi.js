@@ -48,6 +48,18 @@ const serviceGroups = () => {
     return get('/servicegroups');
 };
 
+const search = (query, domainTypes = []) => {
+    let queryString = `/search?query=${query}`;
+    domainTypes.forEach(domainType => {
+        queryString += `&domainType[]=${domainType}`;
+    });
+    return get(queryString);
+};
+
+const searchPersons = query => {
+    return search(query, ['person']);
+};
+
 const acceptServiceRequest = (personId, serviceRequestId, serviceId) => {
     const body = {
         serviceId: serviceId,
@@ -72,5 +84,7 @@ export {
     services,
     serviceGroups,
     acceptServiceRequest,
-    declineServiceRequest
+    declineServiceRequest,
+    search,
+    searchPersons
 };
