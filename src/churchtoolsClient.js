@@ -70,6 +70,9 @@ const oldApi = (module, func, params) => {
 };
 
 const buildUrl = uri => {
+    if (uri.startsWith('http')) {
+        return uri;
+    }
     return `${churchToolsBaseUrl}/api${uri}`;
 };
 
