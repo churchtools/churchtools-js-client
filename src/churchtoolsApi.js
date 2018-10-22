@@ -56,6 +56,16 @@ const search = (query, domainTypes = []) => {
     return get(queryString);
 };
 
+const persons = personIds => {
+    let queryString = '/persons?';
+    const queryParams = personIds
+        .map(personId => {
+            return 'ids[]=' + personId;
+        })
+        .join('&');
+    return get(queryString + queryParams);
+};
+
 const searchPersons = query => {
     return search(query, ['person']);
 };
@@ -86,5 +96,6 @@ export {
     acceptServiceRequest,
     declineServiceRequest,
     search,
-    searchPersons
+    searchPersons,
+    persons
 };
