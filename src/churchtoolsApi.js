@@ -57,6 +57,9 @@ const search = (query, domainTypes = []) => {
 };
 
 const persons = personIds => {
+    if (personIds.length === 0) {
+        return [];
+    }
     let queryString = '/persons?';
     const queryParams = personIds
         .map(personId => {
