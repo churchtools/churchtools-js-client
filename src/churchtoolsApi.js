@@ -96,11 +96,11 @@ const undoServiceRequest = (personId, serviceRequestId) => {
     return post(`/persons/${personId}/servicerequests/${serviceRequestId}/undo`);
 };
 
-export function sendDeviceId(userId, token, type) {
+const sendDeviceId = (userId, token, type) => {
     return put('/persons/' + userId + '/devices/' + token, {
         type
     });
-}
+};
 
 export {
     login,
@@ -118,5 +118,6 @@ export {
     search,
     searchPersons,
     persons,
+    sendDeviceId,
     undoServiceRequest
 };
