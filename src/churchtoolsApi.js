@@ -73,16 +73,33 @@ const searchPersons = query => {
     return search(query, ['person']);
 };
 
-const acceptServiceRequest = (personId, serviceRequestId, serviceId) => {
+const acceptServiceRequest = (personId, serviceRequestId, comment = null) => {
     const body = {
-        serviceId: serviceId,
         agreed: true
     };
+    if (comment) {
+        body.comment = comment;
+    }
     return put(`/persons/${personId}/servicerequests/${serviceRequestId}`, body);
 };
 
-const declineServiceRequest = (personId, serviceRequestId) => {
+const declineServiceRequest = (personId, serviceRequestId, comment = null) => {
+    if (comment) {
+        return deleteApi(`/persons/${personId}/servicerequests/${serviceRequestId}`, {
+            comment
+        });
+    }
     return deleteApi(`/persons/${personId}/servicerequests/${serviceRequestId}`);
+};
+
+const undoServiceRequest = (personId, serviceRequestId) => {
+    return post(`/persons/${personId}/servicerequests/${serviceRequestId}/undo`);
+};
+
+const sendDeviceId = (userId, token, type) => {
+    return put('/persons/' + userId + '/devices/' + token, {
+        type
+    });
 };
 
 export {
@@ -100,5 +117,7 @@ export {
     declineServiceRequest,
     search,
     searchPersons,
-    persons
+    persons,
+    sendDeviceId,
+    undoServiceRequest
 };
