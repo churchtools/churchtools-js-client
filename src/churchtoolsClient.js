@@ -208,7 +208,7 @@ const validChurchToolsUrl = url => {
             .get(infoEndpoint)
             .then(response => {
                 const build = parseInt(response.data.build);
-                if (build >= 31190) {
+                if (build >= MINIMAL_CHURCHTOOLS_BUILD_VERSION) {
                     resolve();
                 } else if (response.data.buid) {
                     reject({
