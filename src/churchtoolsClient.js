@@ -210,7 +210,7 @@ const validChurchToolsUrl = url => {
                 const build = parseInt(response.data.build);
                 if (build >= MINIMAL_CHURCHTOOLS_BUILD_VERSION) {
                     resolve();
-                } else if (response.data.buid) {
+                } else if (response.data.build) {
                     reject({
                         message: `The url ${url} points to a ChurchTools Installation, but its version is too old. At least build ${MINIMAL_CHURCHTOOLS_BUILD_VERSION} is required.`,
                         messageKey: 'churchtools.url.invalidold',
