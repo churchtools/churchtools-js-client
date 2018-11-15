@@ -76,10 +76,10 @@ const buildUrl = uri => {
     return `${churchToolsBaseUrl}/api${uri}`;
 };
 
-const get = uri => {
+const get = (uri, params = {}) => {
     return new Promise((resolve, reject) => {
         axios
-            .get(buildUrl(uri))
+            .get(buildUrl(uri), { params: params })
             .then(response => {
                 resolve(responseToData(response));
             })
@@ -88,6 +88,8 @@ const get = uri => {
             });
     });
 };
+
+const customRetryParam = 'X-retry-login';
 
 const put = (uri, data) => {
     return new Promise((resolve, reject) => {
@@ -136,26 +138,29 @@ const notifyUnauthenticated = () => {
 };
 
 const retryWithLogin = (config, loginToken, personId, resolve, reject, previousError) => {
-    tryingToLoginAgain = true;
     log('Trying transparent relogin with login token');
-    get(`/whoami?login_token=${loginToken}&user_id=${personId}&no_url_rewrite=true`)
+    get('/whoami', { login_token: loginToken, user_id: personId, no_url_rewrite: true, customRetryParam: true })
         .then(() => {
             axios
                 .request(config)
                 .then(response => {
-                    tryingToLoginAgain = false;
                     log('Successfully logged in again with login token');
                     resolve(response);
                 })
                 .catch(error => {
-                    tryingToLoginAgain = false;
-                    log('Failed to login with login token', error);
-                    reject(error);
-                    notifyUnauthenticated();
+                    if (
+                        (error.response && error.response.status) === 401 ||
+                        (error.response && error.response.message && error.response.data.message === 'Session expired!')
+                    ) {
+                        log('Failed to login with login token', error);
+                        reject(error);
+                        notifyUnauthenticated();
+                    } else {
+                        reject(previousError);
+                    }
                 });
         })
         .catch(() => {
-            tryingToLoginAgain = false;
             reject(previousError);
         });
 };
@@ -173,22 +178,21 @@ const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
                 return Promise.resolve(response);
             }
         },
-        error => {
+        errorObject => {
             return new Promise((resolve, reject) => {
-                if (tryingToLoginAgain) {
-                    tryingToLoginAgain = false;
+                if (errorObject.config.params[customRetryParam]) {
                     notifyUnauthenticated();
-                    reject(error);
+                    reject(errorObject);
                 }
-                if (error.response && error.response.status === 401) {
-                    log('Got 401 session expired', error);
+                if (errorObject.response && errorObject.response.status === 401) {
+                    log('Got 401 session expired', errorObject);
                     if (loginToken) {
-                        retryWithLogin(error.config, loginToken, personId, resolve, reject, error);
+                        retryWithLogin(errorObject.config, loginToken, personId, resolve, reject, errorObject);
                     } else {
                         notifyUnauthenticated();
                     }
                 } else {
-                    reject(error);
+                    reject(errorObject);
                 }
             });
         }
