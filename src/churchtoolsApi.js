@@ -102,6 +102,10 @@ const sendDeviceId = (userId, token, type) => {
     });
 };
 
+const deleteDeviceId = (userId, token) => {
+    return deleteApi('/persons/' + userId + '/devices/' + token);
+};
+
 export {
     login,
     totp,
@@ -119,5 +123,6 @@ export {
     searchPersons,
     persons,
     sendDeviceId,
-    undoServiceRequest
+    undoServiceRequest,
+    deleteDeviceId
 };
