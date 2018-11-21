@@ -4,7 +4,6 @@ import { toCorrectChurchToolsUrl } from './urlHelper';
 
 let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
-let tryingToLoginAgain = false;
 const unauthenticatedCallbacks = [];
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31243;
 
@@ -180,7 +179,7 @@ const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
         },
         errorObject => {
             return new Promise((resolve, reject) => {
-                if (errorObject.config.params[customRetryParam]) {
+                if (errorObject.config.params && errorObject.config.params[customRetryParam]) {
                     notifyUnauthenticated();
                     reject(errorObject);
                 }
