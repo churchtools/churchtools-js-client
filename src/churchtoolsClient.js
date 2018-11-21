@@ -6,6 +6,7 @@ let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 const unauthenticatedCallbacks = [];
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31243;
+const MINIMAL_CHURCHTOOLS_VERSION = '3.39.0';
 
 /**
  * Sets the default ChurchTools url.
@@ -215,11 +216,11 @@ const validChurchToolsUrl = url => {
                     resolve();
                 } else if (response.data.build) {
                     reject({
-                        message: `The url ${url} points to a ChurchTools Installation, but its version is too old. At least build ${MINIMAL_CHURCHTOOLS_BUILD_VERSION} is required.`,
+                        message: `The url ${url} points to a ChurchTools Installation, but its version is too old. At least version ${MINIMAL_CHURCHTOOLS_VERSION} is required.`,
                         messageKey: 'churchtools.url.invalidold',
                         args: {
                             url: url,
-                            minimalChurchToolsBuildVersion: MINIMAL_CHURCHTOOLS_BUILD_VERSION
+                            minimalChurchToolsVersion: MINIMAL_CHURCHTOOLS_VERSION
                         }
                     });
                 } else {
