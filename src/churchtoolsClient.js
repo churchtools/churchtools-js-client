@@ -139,7 +139,7 @@ const notifyUnauthenticated = () => {
 
 const retryWithLogin = (config, loginToken, personId, resolve, reject, previousError) => {
     log('Trying transparent relogin with login token');
-    get('/whoami', { login_token: loginToken, user_id: personId, no_url_rewrite: true, customRetryParam: true })
+    get('/whoami', { login_token: loginToken, user_id: personId, no_url_rewrite: true, [customRetryParam]: true })
         .then(() => {
             axios
                 .request(config)
@@ -183,8 +183,7 @@ const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
                 if (errorObject.config.params && errorObject.config.params[customRetryParam]) {
                     notifyUnauthenticated();
                     reject(errorObject);
-                }
-                if (errorObject.response && errorObject.response.status === 401) {
+                } else if (errorObject.response && errorObject.response.status === 401) {
                     log('Got 401 session expired', errorObject);
                     if (loginToken) {
                         retryWithLogin(errorObject.config, loginToken, personId, resolve, reject, errorObject);
