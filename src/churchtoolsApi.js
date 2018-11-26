@@ -1,9 +1,10 @@
 import { oldApi, get, post, put, deleteApi } from './churchtoolsClient';
 
-const login = (username, password) => {
+const login = (username, password, rememberMe = true) => {
     return post('/login', {
         username: username,
-        password: password
+        password: password,
+        rememberMe
     });
 };
 
