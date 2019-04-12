@@ -64,6 +64,9 @@
                 declineServiceRequest: () => {
                     return api.declineServiceRequest(1, 1, 1);
                 },
+                personSearch: () => {
+                    return api.searchPersons('david');
+                },
                 logintoken: () => {
                     return api.logintoken(1);
                 }
