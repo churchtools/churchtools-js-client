@@ -52,7 +52,7 @@ const serviceGroups = () => {
 const search = (query, domainTypes = []) => {
     let queryString = `/search?query=${query}`;
     domainTypes.forEach(domainType => {
-        queryString += `&domainType[]=${domainType}`;
+        queryString += `&domainTypes[]=${domainType}`;
     });
     return get(queryString);
 };
