@@ -6,7 +6,7 @@ let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 const unauthenticatedCallbacks = [];
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31243;
-const MINIMAL_CHURCHTOOLS_VERSION = '3.39.0';
+const MINIMAL_CHURCHTOOLS_VERSION = '3.45.0';
 
 /**
  * Sets the default ChurchTools url.
