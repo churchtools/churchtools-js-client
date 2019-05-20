@@ -233,14 +233,22 @@ const validChurchToolsUrl = url => {
                 }
             })
             .catch(error => {
-                log('Error on checking url', error);
-                reject({
-                    message: `The url ${url} does not point to a valid ChurchTools installation.`,
-                    messageKey: 'churchtools.url.invalid',
-                    args: {
-                        url: url
-                    }
-                });
+                if (!error.status) {
+                    log('Network error: Offline');
+                    reject({
+                        message: 'Could not validate the url. There is a problem with the internet connection.',
+                        messageKey: 'churchtools.url.offline'
+                    });
+                } else {
+                    log('Error on checking url', error);
+                    reject({
+                        message: `The url ${url} does not point to a valid ChurchTools installation.`,
+                        messageKey: 'churchtools.url.invalid',
+                        args: {
+                            url: url
+                        }
+                    });
+                }
             });
     });
 };
