@@ -234,7 +234,7 @@ const validChurchToolsUrl = url => {
             })
             .catch(error => {
                 if (!error.status) {
-                    log('Network error: Offline');
+                    log('Network error: Offline', error);
                     reject({
                         message:
                             'Could not validate the url. Either the url is wrong or there is a problem with the internet connection',
