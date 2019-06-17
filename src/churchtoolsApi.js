@@ -57,7 +57,7 @@ const search = (query, domainTypes = []) => {
     return get(queryString);
 };
 
-const persons = personIds => {
+const persons = (personIds, limit = 10) => {
     if (personIds.length === 0) {
         return [];
     }
@@ -67,7 +67,7 @@ const persons = personIds => {
             return 'ids[]=' + personId;
         })
         .join('&');
-    return get(queryString + queryParams);
+    return get(queryString + queryParams + '&limit=' + limit);
 };
 
 const searchPersons = query => {
