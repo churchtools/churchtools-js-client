@@ -76,17 +76,43 @@ const buildUrl = uri => {
     return `${churchToolsBaseUrl}/api${uri}`;
 };
 
-const get = (uri, params = {}) => {
+const get = (uri, params = {}, rawResponse = false) => {
     return new Promise((resolve, reject) => {
         axios
             .get(buildUrl(uri), { params: params })
             .then(response => {
-                resolve(responseToData(response));
+                if (rawResponse) {
+                    resolve(response);
+                } else {
+                    resolve(responseToData(response));
+                }
             })
             .catch(error => {
                 reject(error);
             });
     });
+};
+
+const getAllPages = (uri, params = {}) => {
+    params.limit = 1;
+
+    return new Promise((resolve, reject) => {
+        getAllPagesInternal(uri, params, 1, resolve, reject);
+    });
+};
+
+const getAllPagesInternal = (uri, params, page, resolve, reject, result = []) => {
+    params.page = page;
+    get(uri, params, true)
+        .then(response => {
+            result.push(...responseToData(response));
+            if (response.data.meta.pagination.lastPage > page) {
+                getAllPagesInternal(uri, params, page + 1, resolve, reject, result);
+            } else {
+                resolve(result);
+            }
+        })
+        .catch(reject);
 };
 
 const customRetryParam = 'X-retry-login';
@@ -264,5 +290,6 @@ export {
     setUnauthorizedInterceptor,
     enableCrossOriginRequests,
     onUnauthenticated,
-    validChurchToolsUrl
+    validChurchToolsUrl,
+    getAllPages
 };

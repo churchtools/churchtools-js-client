@@ -1,4 +1,4 @@
-import { oldApi, get, post, put, deleteApi } from './churchtoolsClient';
+import { oldApi, get, post, put, deleteApi, getAllPages } from './churchtoolsClient';
 
 const login = (username, password, rememberMe = true) => {
     return post('/login', {
@@ -40,6 +40,14 @@ const logintoken = personId => {
 
 const person = personId => {
     return get(`/persons/${personId}`);
+};
+
+const group = groupId => {
+    return get(`/groups/${groupId}`);
+};
+
+const members = groupId => {
+    return getAllPages(`/groups/${groupId}/members`);
 };
 
 const services = () => {
@@ -107,6 +115,10 @@ const deleteDeviceId = (userId, token) => {
     return deleteApi('/persons/' + userId + '/devices/' + token);
 };
 
+const agenda = eventId => {
+    return get(`/events/${eventId}/agenda`);
+};
+
 export {
     login,
     totp,
@@ -125,5 +137,8 @@ export {
     persons,
     sendDeviceId,
     undoServiceRequest,
-    deleteDeviceId
+    deleteDeviceId,
+    agenda,
+    members,
+    group
 };
