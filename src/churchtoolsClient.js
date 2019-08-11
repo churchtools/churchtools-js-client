@@ -94,7 +94,7 @@ const get = (uri, params = {}, rawResponse = false) => {
 };
 
 const getAllPages = (uri, params = {}) => {
-    params.limit = 1;
+    params.limit = 100;
 
     return new Promise((resolve, reject) => {
         getAllPagesInternal(uri, params, 1, resolve, reject);
