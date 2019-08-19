@@ -119,6 +119,10 @@ const agenda = eventId => {
     return get(`/events/${eventId}/agenda`);
 };
 
+const personMasterData = () => {
+    return get('/masterdata/person');
+};
+
 export {
     login,
     totp,
@@ -140,5 +144,6 @@ export {
     deleteDeviceId,
     agenda,
     members,
-    group
+    group,
+    personMasterData
 };
