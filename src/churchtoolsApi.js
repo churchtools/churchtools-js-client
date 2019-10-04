@@ -78,6 +78,41 @@ const persons = (personIds, limit = 10) => {
     return get(queryString + queryParams + '&limit=' + limit);
 };
 
+const personAllIntern = (persons, remainingPersonIds, resolve, reject) => {
+    const personsPerCall = 100;
+    const personIds = remainingPersonIds.slice(0, personsPerCall - 1);
+    let queryString = '/persons?';
+    const queryParams = personIds
+        .map(personId => {
+            return 'ids[]=' + personId;
+        })
+        .join('&');
+    get(queryString + queryParams + '&limit=' + personsPerCall)
+        .then(personsResult => {
+            persons.push(personsResult);
+            const remaining = remainingPersonIds.slice(personsPerCall);
+            if (remaining.length > 0) {
+                personAllIntern(persons, remaining, resolve, reject);
+            } else {
+                resolve(persons);
+            }
+        })
+        .catch(reject);
+};
+
+const personsAll = personIds => {
+    return new Promise((resolve, reject) => {
+        personAllIntern(
+            [],
+            personIds,
+            persons => {
+                resolve(persons);
+            },
+            error => reject(error)
+        );
+    });
+};
+
 const searchPersons = query => {
     return search(query, ['person']);
 };
@@ -139,6 +174,7 @@ export {
     search,
     searchPersons,
     persons,
+    personsAll,
     sendDeviceId,
     undoServiceRequest,
     deleteDeviceId,
