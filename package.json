@@ -1,6 +1,6 @@
 {
     "name": "churchtools-client",
-    "version": "0.1.0",
+    "version": "0.2.3",
     "description": "Client bibliothec to interact with a ChurchTools Server.",
     "main": "dist/churchtools-client.js",
     "scripts": {
@@ -10,10 +10,7 @@
         "prettier": "prettier --write \"src/**/*.js\"",
         "eslint": "eslint src/**/*.js"
     },
-    "keywords": [
-        "churchtools",
-        "client"
-    ],
+    "keywords": ["churchtools", "client"],
     "author": "David Schilling <dschilling@churchtools.de>",
     "license": "Apache-2.0",
     "devDependencies": {
