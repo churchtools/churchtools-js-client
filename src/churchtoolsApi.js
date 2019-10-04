@@ -89,7 +89,7 @@ const personAllIntern = (persons, remainingPersonIds, resolve, reject) => {
         .join('&');
     get(queryString + queryParams + '&limit=' + personsPerCall)
         .then(personsResult => {
-            persons.push(personsResult);
+            persons = persons.concat(personsResult);
             const remaining = remainingPersonIds.slice(personsPerCall);
             if (remaining.length > 0) {
                 personAllIntern(persons, remaining, resolve, reject);
