@@ -158,6 +158,10 @@ const personMasterData = () => {
     return get('/masterdata/person');
 };
 
+const installationInfos = () => {
+    return get('/info');
+};
+
 export {
     login,
     totp,
@@ -181,5 +185,6 @@ export {
     agenda,
     members,
     group,
-    personMasterData
+    personMasterData,
+    installationInfos
 };
