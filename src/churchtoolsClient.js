@@ -231,14 +231,19 @@ const onUnauthenticated = callback => {
 };
 
 const validChurchToolsUrl = url => {
-    const infoEndpoint = `${toCorrectChurchToolsUrl(url)}/api/info`;
+    const infoApiPath = '/api/info';
+    const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
     return new Promise((resolve, reject) => {
         axios
             .get(infoEndpoint)
             .then(response => {
                 const build = parseInt(response.data.build);
                 if (build >= MINIMAL_CHURCHTOOLS_BUILD_VERSION) {
-                    resolve();
+                    if (response.request.responseURL !== infoEndpoint && response.request.responseURL) {
+                        resolve(response.request.responseURL.slice(0, -infoApiPath.length));
+                    } else {
+                        resolve(url);
+                    }
                 } else if (response.data.build) {
                     reject({
                         message: `The url ${url} points to a ChurchTools Installation, but its version is too old. At least version ${MINIMAL_CHURCHTOOLS_VERSION} is required.`,
