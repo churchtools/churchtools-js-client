@@ -162,6 +162,22 @@ const installationInfos = () => {
     return get('/info');
 };
 
+const personTags = personId => {
+    return get('/persons/' + personId + '/tags');
+};
+
+const personRelationships = personId => {
+    return get('/persons/' + personId + '/relationships');
+};
+
+const statuses = () => {
+    return get('/statuses');
+};
+
+const campuses = () => {
+    return get('/campuses');
+};
+
 export {
     login,
     totp,
@@ -186,5 +202,9 @@ export {
     members,
     group,
     personMasterData,
-    installationInfos
+    installationInfos,
+    personTags,
+    personRelationships,
+    statuses,
+    campuses
 };
