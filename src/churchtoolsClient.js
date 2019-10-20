@@ -5,8 +5,8 @@ import { toCorrectChurchToolsUrl } from './urlHelper';
 let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 const unauthenticatedCallbacks = [];
-const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31306;
-const MINIMAL_CHURCHTOOLS_VERSION = '3.45.0';
+const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31376;
+const MINIMAL_CHURCHTOOLS_VERSION = '3.50.0';
 
 /**
  * Sets the default ChurchTools url.
