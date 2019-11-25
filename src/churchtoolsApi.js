@@ -78,31 +78,50 @@ const persons = (personIds, limit = 10) => {
     return get(queryString + queryParams + '&limit=' + limit);
 };
 
-const personAllIntern = (persons, remainingPersonIds, resolve, reject) => {
-    const personsPerCall = 100;
-    const personIds = remainingPersonIds.slice(0, personsPerCall - 1);
-    let queryString = '/persons?';
-    const queryParams = personIds
-        .map(personId => {
-            return 'ids[]=' + personId;
+const getAllByIds = (baseQuery, result, remainingIds, resolve, reject) => {
+    const resultsPerCall = 100;
+    const ids = remainingIds.slice(0, resultsPerCall - 1);
+    let queryString = baseQuery + '?';
+    const queryParams = ids
+        .map(id => {
+            return 'ids[]=' + id;
         })
         .join('&');
-    get(queryString + queryParams + '&limit=' + personsPerCall)
-        .then(personsResult => {
-            persons = persons.concat(personsResult);
-            const remaining = remainingPersonIds.slice(personsPerCall);
+    get(queryString + queryParams + '&limit=' + resultsPerCall)
+        .then(resultFromApi  => {
+            result = result.concat(resultFromApi);
+            const remaining = remainingIds.slice(resultsPerCall);
             if (remaining.length > 0) {
-                personAllIntern(persons, remaining, resolve, reject);
+                getAllByIds(baseQuery, result, remaining, resolve, reject);
             } else {
-                resolve(persons);
+                resolve(result);
             }
         })
         .catch(reject);
+
+};
+
+const groupsAll = groupIds => {
+    if (groupIds === null || groupIds === undefined) {
+        return getAllPages('/groups');
+    }
+    return new Promise((resolve, reject) => {
+        getAllByIds(
+            '/groups',
+            [],
+            groupIds,
+            groups => {
+                resolve(groups);
+            },
+            error => reject(error)
+        );
+    });
 };
 
 const personsAll = personIds => {
     return new Promise((resolve, reject) => {
-        personAllIntern(
+        getAllByIds(
+            '/persons',
             [],
             personIds,
             persons => {
@@ -206,5 +225,6 @@ export {
     personTags,
     personRelationships,
     statuses,
-    campuses
+    campuses,
+    groupsAll
 };
