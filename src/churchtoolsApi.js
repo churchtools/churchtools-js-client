@@ -197,6 +197,14 @@ const campuses = () => {
     return get('/campuses');
 };
 
+const config = () => {
+    return get('/config');
+};
+
+const groupsForPerson = personId => {
+    return get(`/persons/${personId}/groups`);
+};
+
 export {
     login,
     totp,
@@ -226,5 +234,7 @@ export {
     personRelationships,
     statuses,
     campuses,
-    groupsAll
+    groupsAll,
+    config,
+    groupsForPerson
 };
