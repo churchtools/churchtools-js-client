@@ -205,6 +205,40 @@ const groupsForPerson = personId => {
     return get(`/persons/${personId}/groups`);
 };
 
+const getFilteredGroups = (
+    isPublic,
+    isOpenForMembers,
+    campusIds,
+    ageGroupId,
+    groupTypeIds,
+    limit) => {
+    let query = '';
+    if (typeof isPublic === 'boolean') {
+        query += `&is_public=${isPublic}`;
+    }
+    if (typeof isOpenForMembers === 'boolean') {
+        query += `&is_open_for_members=${isOpenForMembers}`;
+    }
+    if (campusIds && campusIds.length) {
+        query += campusIds.map(id => `&campus_ids[]=${id}`).join('');
+    }
+    if (typeof ageGroupId === 'number') {
+        query += `&agegroup_id=${ageGroupId}`;
+    }
+    if (groupTypeIds && groupTypeIds.length) {
+        query += groupTypeIds.map(id => `&group_type_ids[]=${id}`).join('');
+    }
+    if (typeof limit === 'number') {
+        query += `&limit=${limit}`;
+    }
+    if (query.length === 0) {
+        return [];
+    }
+    // remove leading '&'
+    query = query.slice(1);
+    return get(`/groups?${query}`);
+};
+
 export {
     login,
     totp,
@@ -236,5 +270,6 @@ export {
     campuses,
     groupsAll,
     config,
-    groupsForPerson
+    groupsForPerson,
+    getFilteredGroups
 };
