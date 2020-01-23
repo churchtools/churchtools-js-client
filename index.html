@@ -78,6 +78,9 @@
                 },
                 groupsAll: () => {
                     return api.groupsAll();
+                },
+                getFilteredGroups: () => {
+                    return api.getFilteredGroups(undefined, true, undefined, 1, undefined, 5);
                 }
             };
 
