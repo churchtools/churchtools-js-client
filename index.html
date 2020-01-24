@@ -79,6 +79,9 @@
                 groupsAll: () => {
                     return api.groupsAll();
                 },
+                groupsForPerson: () => {
+                    return api.groupsForPerson(1);
+                },
                 getFilteredGroups: () => {
                     return api.getFilteredGroups({campusIds: [1, null], isOpenForMembers: true, ageGroupIds: [1, null]});
                 },

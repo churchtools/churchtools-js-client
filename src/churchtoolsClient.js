@@ -122,7 +122,7 @@ const put = (uri, data) => {
         axios
             .put(buildUrl(uri), data)
             .then(response => {
-                resolve(responseToData(response.data));
+                resolve(responseToData(response));
             })
             .catch(error => {
                 reject(error);
@@ -135,7 +135,7 @@ const post = (uri, data = {}) => {
         axios
             .post(buildUrl(uri), data)
             .then(response => {
-                resolve(responseToData(response.data));
+                resolve(responseToData(response));
             })
             .catch(error => {
                 reject(error);
@@ -148,7 +148,7 @@ const deleteApi = (uri, data = {}) => {
         axios
             .delete(buildUrl(uri), { data: data })
             .then(response => {
-                resolve(response.data);
+                resolve(responseToData(response));
             })
             .catch(error => {
                 reject(error);
