@@ -205,42 +205,41 @@ const groupsForPerson = personId => {
     return get(`/persons/${personId}/groups`);
 };
 
-const getFilteredGroups = (
-    isPublic,
-    isOpenForMembers,
-    campusIds,
-    ageGroupId,
-    groupTypeIds,
-    limit) => {
+const getFilteredGroups = optios => {
     let query = '';
-    if (typeof isPublic === 'boolean') {
-        query += `&is_public=${isPublic}`;
+    if (typeof optios.isPublic === 'boolean') {
+        query += `&is_public=${optios.isPublic}`;
     }
-    if (typeof isOpenForMembers === 'boolean') {
-        query += `&is_open_for_members=${isOpenForMembers}`;
+    if (typeof optios.isOpenForMembers === 'boolean') {
+        query += `&is_open_for_members=${optios.isOpenForMembers}`;
     }
-    if (campusIds && campusIds.length) {
-        query += campusIds.map(id => `&campus_ids[]=${id}`).join('');
+    if (optios.campusIds && optios.campusIds.length) {
+        query += optios.campusIds.map(id => `&campus_ids[]=${id}`).join('');
     }
-    if (typeof ageGroupId === 'number') {
-        query += `&agegroup_id=${ageGroupId}`;
+    if (optios.ageGroupIds && optios.ageGroupIds.length) {
+        query += optios.ageGroupIds.map(id => `&agegroup_ids[]=${id}`).join('');
     }
-    if (groupTypeIds && groupTypeIds.length) {
-        query += groupTypeIds.map(id => `&group_type_ids[]=${id}`).join('');
+    if (optios.groupTypeIds && optios.groupTypeIds.length) {
+        query += optios.groupTypeIds.map(id => `&group_type_ids[]=${id}`).join('');
     }
-    if (typeof limit === 'number' && limit != Infinity) {
-        query += `&limit=${limit}`;
+    if (typeof optios.limit === 'number' && optios.limit != Infinity) {
+        query += `&limit=${optios.limit}`;
     }
     if (query.length === 0) {
         return [];
     }
     // remove leading '&'
     query = query.slice(1);
-    if (limit === Infinity) {
+    if (optios.limit === Infinity) {
         return getAllPages(`/groups?${query}`);
     }
     return get(`/groups?${query}`);
 };
+
+const getGroupSignUpLink = (groupId, personId) => {
+    return post(`/publicgroups/${groupId}/token?personId=${personId}`);
+};
+
 
 export {
     login,
@@ -274,12 +273,6 @@ export {
     groupsAll,
     config,
     groupsForPerson,
-    getFilteredGroups
+    getFilteredGroups,
+    getGroupSignUpLink
 };
-
-getFilteredGroups(undefined,
-    true,
-    [1],
-    1,
-    [1,4],
-    Infinity);

@@ -80,7 +80,10 @@
                     return api.groupsAll();
                 },
                 getFilteredGroups: () => {
-                    return api.getFilteredGroups(undefined, true, undefined, 1, undefined, Infinity);
+                    return api.getFilteredGroups({campusIds: [1, null], isOpenForMembers: true, ageGroupIds: [1, null]});
+                },
+                getGroupSignUpLink: () => {
+                    return api.getGroupSignUpLink(22, 1);
                 }
             };
 
