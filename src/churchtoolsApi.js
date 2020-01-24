@@ -228,7 +228,7 @@ const getFilteredGroups = (
     if (groupTypeIds && groupTypeIds.length) {
         query += groupTypeIds.map(id => `&group_type_ids[]=${id}`).join('');
     }
-    if (typeof limit === 'number') {
+    if (typeof limit === 'number' && limit != Infinity) {
         query += `&limit=${limit}`;
     }
     if (query.length === 0) {
@@ -236,6 +236,9 @@ const getFilteredGroups = (
     }
     // remove leading '&'
     query = query.slice(1);
+    if (limit === Infinity) {
+        return getAllPages(`/groups?${query}`);
+    }
     return get(`/groups?${query}`);
 };
 
@@ -273,3 +276,10 @@ export {
     groupsForPerson,
     getFilteredGroups
 };
+
+getFilteredGroups(undefined,
+    true,
+    [1],
+    1,
+    [1,4],
+    Infinity);
