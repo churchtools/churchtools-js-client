@@ -237,7 +237,7 @@ const getFilteredGroups = optios => {
 };
 
 const getGroupSignUpLink = (groupId, personId) => {
-    return post(`/publicgroups/${groupId}/token?personId=${personId}`);
+    return post(`/publicgroups/${groupId}/token`, {personId, clicked: [personId]});
 };
 
 
