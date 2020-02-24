@@ -88,7 +88,7 @@ const getAllByIds = (baseQuery, result, remainingIds, resolve, reject) => {
         })
         .join('&');
     get(queryString + queryParams + '&limit=' + resultsPerCall)
-        .then(resultFromApi  => {
+        .then(resultFromApi => {
             result = result.concat(resultFromApi);
             const remaining = remainingIds.slice(resultsPerCall);
             if (remaining.length > 0) {
@@ -98,7 +98,6 @@ const getAllByIds = (baseQuery, result, remainingIds, resolve, reject) => {
             }
         })
         .catch(reject);
-
 };
 
 const groupsAll = groupIds => {
@@ -210,6 +209,12 @@ const getFilteredGroups = optios => {
     if (typeof optios.isPublic === 'boolean') {
         query += `&is_public=${optios.isPublic}`;
     }
+    if (typeof optios.showOverdueGroups === 'boolean') {
+        query += `&show_overdue_groups=${optios.showOverdueGroups}`;
+    }
+    if (typeof optios.showInactiveGroups === 'boolean') {
+        query += `&show_inactive_groups=${optios.showInactiveGroups}`;
+    }
     if (typeof optios.isOpenForMembers === 'boolean') {
         query += `&is_open_for_members=${optios.isOpenForMembers}`;
     }
@@ -237,9 +242,8 @@ const getFilteredGroups = optios => {
 };
 
 const getGroupSignUpLink = (groupId, personId) => {
-    return post(`/publicgroups/${groupId}/token`, {personId, clicked: [personId]});
+    return post(`/publicgroups/${groupId}/token`, { personId, clicked: [personId] });
 };
-
 
 export {
     login,
