@@ -218,6 +218,9 @@ const getFilteredGroups = optios => {
     if (typeof optios.isOpenForMembers === 'boolean') {
         query += `&is_open_for_members=${optios.isOpenForMembers}`;
     }
+    if (typeof optios.withoutMyGroups === 'boolean') {
+        query += `&without_my_groups=${optios.withoutMyGroups}`;
+    }
     if (optios.campusIds && optios.campusIds.length) {
         query += optios.campusIds.map(id => `&campus_ids[]=${id}`).join('');
     }
