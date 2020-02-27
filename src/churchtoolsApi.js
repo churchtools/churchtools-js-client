@@ -200,8 +200,10 @@ const config = () => {
     return get('/config');
 };
 
-const groupsForPerson = personId => {
-    return get(`/persons/${personId}/groups`);
+const groupsForPerson = (personId, showInactiveGroups = false, showOverdueGroups = false) => {
+    return get(
+        `/persons/${personId}/groups?show_overdue_groups=${showOverdueGroups}&show_inactive_groups=${showInactiveGroups}`
+    );
 };
 
 const getFilteredGroups = optios => {

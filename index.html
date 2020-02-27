@@ -80,7 +80,7 @@
                     return api.groupsAll();
                 },
                 groupsForPerson: () => {
-                    return api.groupsForPerson(1);
+                    return api.groupsForPerson(1, true, true);
                 },
                 getFilteredGroups: () => {
                     return api.getFilteredGroups({campusIds: [1, null], isOpenForMembers: true, ageGroupIds: [1, null]});
