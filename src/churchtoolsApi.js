@@ -78,21 +78,22 @@ const persons = (personIds, limit = 10) => {
     return get(queryString + queryParams + '&limit=' + limit);
 };
 
-const getAllByIds = (baseQuery, result, remainingIds, resolve, reject) => {
+const getAllByIds = (baseQuery, options, result, remainingIds, resolve, reject) => {
     const resultsPerCall = 100;
     const ids = remainingIds.slice(0, resultsPerCall - 1);
     let queryString = baseQuery + '?';
+    const queryOptions = options ? options + '&' : '';
     const queryParams = ids
         .map(id => {
             return 'ids[]=' + id;
         })
         .join('&');
-    get(queryString + queryParams + '&limit=' + resultsPerCall)
+    get(queryString + queryOptions + queryParams + '&limit=' + resultsPerCall)
         .then(resultFromApi => {
             result = result.concat(resultFromApi);
             const remaining = remainingIds.slice(resultsPerCall);
             if (remaining.length > 0) {
-                getAllByIds(baseQuery, result, remaining, resolve, reject);
+                getAllByIds(baseQuery, options, result, remaining, resolve, reject);
             } else {
                 resolve(result);
             }
@@ -100,13 +101,14 @@ const getAllByIds = (baseQuery, result, remainingIds, resolve, reject) => {
         .catch(reject);
 };
 
-const groupsAll = groupIds => {
+const groupsAll = (groupIds, showOverdueGroups = true, showInactiveGroups = true) => {
     if (groupIds === null || groupIds === undefined) {
         return getAllPages('/groups');
     }
     return new Promise((resolve, reject) => {
         getAllByIds(
             '/groups',
+            `show_overdue_groups=${showOverdueGroups}&show_inactive_groups=${showInactiveGroups}`,
             [],
             groupIds,
             groups => {
@@ -121,6 +123,7 @@ const personsAll = personIds => {
     return new Promise((resolve, reject) => {
         getAllByIds(
             '/persons',
+            '',
             [],
             personIds,
             persons => {
