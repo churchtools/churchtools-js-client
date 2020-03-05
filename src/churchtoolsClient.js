@@ -18,6 +18,8 @@ const setBaseUrl = baseUrl => {
     churchToolsBaseUrl = baseUrl.replace(/\/$/, '');
 };
 
+axios.defaults.timeout = timeout;
+
 axios.interceptors.request.use(request => {
     log('Starting Request', request);
     return request;
@@ -30,7 +32,6 @@ axios.interceptors.response.use(response => {
 
 const enableCrossOriginRequests = () => {
     axios.defaults.withCredentials = true;
-    axios.defaults.timeout = timeout;
 };
 
 const buildOldRequestObject = (func, params) => {
