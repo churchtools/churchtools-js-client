@@ -5,8 +5,9 @@ import { toCorrectChurchToolsUrl } from './urlHelper';
 let churchToolsBaseUrl = null;
 let unauthorizedInterceptor = null;
 const unauthenticatedCallbacks = [];
-const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31360;
-const MINIMAL_CHURCHTOOLS_VERSION = '3.50.0';
+const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31412;
+const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
+const timeout = 15000;
 
 /**
  * Sets the default ChurchTools url.
@@ -29,6 +30,7 @@ axios.interceptors.response.use(response => {
 
 const enableCrossOriginRequests = () => {
     axios.defaults.withCredentials = true;
+    axios.defaults.timeout = timeout;
 };
 
 const buildOldRequestObject = (func, params) => {
@@ -79,7 +81,7 @@ const buildUrl = uri => {
 const get = (uri, params = {}, rawResponse = false) => {
     return new Promise((resolve, reject) => {
         axios
-            .get(buildUrl(uri), { params: params })
+            .get(buildUrl(uri), { params: params})
             .then(response => {
                 if (rawResponse) {
                     resolve(response);
