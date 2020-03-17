@@ -161,9 +161,10 @@ const undoServiceRequest = (personId, serviceRequestId) => {
     return post(`/persons/${personId}/servicerequests/${serviceRequestId}/undo`);
 };
 
-const sendDeviceId = (userId, token, type) => {
+const sendDeviceId = (userId, token, type, version) => {
     return put('/persons/' + userId + '/devices/' + token, {
-        type
+        type,
+        version
     });
 };
 
