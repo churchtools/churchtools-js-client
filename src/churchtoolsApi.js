@@ -254,6 +254,17 @@ const getGroupSignUpLink = (groupId, personId) => {
     return post(`/publicgroups/${groupId}/token`, { personId, clicked: [personId] });
 };
 
+const setProfilePictureForPerson = (personId, options, pictureObj) => {
+    // options format: {crop: {top: number, bottom: number, right: number, left: number}, focus: {x: number, y: number}}
+    // pictureObj format: {name: string, type: string, uri: string}
+    const formData = new FormData();
+    formData.append('max_width', 'undefined');
+    formData.append('max_height', 'undefind');
+    formData.append('image_options', JSON.stringify(options));
+    formData.append('files[]', pictureObj);
+    return post(`/files/avatar/${personId}`, formData);
+};
+
 export {
     login,
     totp,
@@ -287,5 +298,6 @@ export {
     config,
     groupsForPerson,
     getFilteredGroups,
-    getGroupSignUpLink
+    getGroupSignUpLink,
+    setProfilePictureForPerson
 };
