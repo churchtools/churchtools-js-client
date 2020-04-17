@@ -265,6 +265,14 @@ const setProfilePictureForPerson = (personId, options, pictureObj) => {
     return post(`/files/avatar/${personId}`, formData);
 };
 
+const getFileMetadata = (fileId) => {
+    return get(`/files/${fileId}/metadata`);
+};
+
+const deleteAvatar = (personId) => {
+    return deleteApi(`/files/avatar/${personId}`);
+};
+
 export {
     login,
     totp,
@@ -299,5 +307,7 @@ export {
     groupsForPerson,
     getFilteredGroups,
     getGroupSignUpLink,
-    setProfilePictureForPerson
+    setProfilePictureForPerson,
+    getFileMetadata,
+    deleteAvatar
 };
