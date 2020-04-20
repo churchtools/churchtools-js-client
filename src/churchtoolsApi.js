@@ -254,12 +254,12 @@ const getGroupSignUpLink = (groupId, personId) => {
     return post(`/publicgroups/${groupId}/token`, { personId, clicked: [personId] });
 };
 
-const setProfilePictureForPerson = (personId, options, pictureObj) => {
+const setProfilePictureForPerson = (personId, originalWidth, originalHeight, options, pictureObj) => {
     // options format: {crop: {top: number, bottom: number, right: number, left: number}, focus: {x: number, y: number}}
     // pictureObj format: {name: string, type: string, uri: string}
     const formData = new FormData();
-    formData.append('max_width', 'undefined');
-    formData.append('max_height', 'undefind');
+    formData.append('max_width', originalWidth.toString());
+    formData.append('max_height', originalHeight.toString());
     formData.append('image_options', JSON.stringify(options));
     formData.append('files[]', pictureObj);
     return post(`/files/avatar/${personId}`, formData);
