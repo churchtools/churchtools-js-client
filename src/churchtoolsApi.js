@@ -273,6 +273,14 @@ const deleteAvatar = (personId) => {
     return deleteApi(`/files/avatar/${personId}`);
 };
 
+const getEvent = (eventId) => {
+    return get(`/events/${eventId}`);
+};
+
+const getAllEvents = () => {
+    return get('/events?include=eventServices');
+};
+
 export {
     login,
     totp,
@@ -309,5 +317,7 @@ export {
     getGroupSignUpLink,
     setProfilePictureForPerson,
     getFileMetadata,
-    deleteAvatar
+    deleteAvatar,
+    getEvent,
+    getAllEvents
 };
