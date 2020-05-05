@@ -281,6 +281,10 @@ const getAllEvents = () => {
     return get('/events?include=eventServices');
 };
 
+const getPublicGroupInfo = (groupId) => {
+    return get(`/publicgroups/${groupId}`);
+};
+
 export {
     login,
     totp,
@@ -319,5 +323,6 @@ export {
     getFileMetadata,
     deleteAvatar,
     getEvent,
-    getAllEvents
+    getAllEvents,
+    getPublicGroupInfo
 };
