@@ -1,7 +1,7 @@
 import axios from 'axios';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
 import tough from 'tough-cookie';
-import { log, activateLogging } from './logging.js';
+import { log } from './logging.js';
 import { toCorrectChurchToolsUrl } from './urlHelper.js';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31412;
@@ -14,12 +14,8 @@ let defaultChurchToolsClient = null;
 
 class ChurchToolsClient extends Object {
 
-    constructor(churchToolsBaseUrl = null, loginToken = null, loggingEnabled = false) {
+    constructor(churchToolsBaseUrl = null, loginToken = null) {
         super();
-
-        if (loggingEnabled) {
-            activateLogging();
-        }
 
         this.churchToolsBaseUrl = churchToolsBaseUrl;
         this.ax = axios.create({
