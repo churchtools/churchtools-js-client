@@ -1,8 +1,9 @@
 {
     "name": "churchtools-client",
-    "version": "0.3.17",
+    "version": "0.3.18",
     "description": "Client bibliothec to interact with a ChurchTools Server.",
     "main": "dist/churchtools-client.js",
+    "type": "module",
     "scripts": {
         "test": "jest",
         "build": "webpack",
@@ -27,6 +28,8 @@
         "webpack-cli": "^2.0.15"
     },
     "dependencies": {
-        "axios": "^0.18.0"
+        "axios": "^0.19.2",
+        "axios-cookiejar-support": "^1.0.0",
+        "tough-cookie": "^4.0.0"
     }
 }
