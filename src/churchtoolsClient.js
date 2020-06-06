@@ -1,8 +1,8 @@
 import axios from 'axios';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
 import tough from 'tough-cookie';
-import { log } from './logging.js';
-import { toCorrectChurchToolsUrl } from './urlHelper.js';
+import { log } from './logging';
+import { toCorrectChurchToolsUrl } from './urlHelper';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31412;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
@@ -12,11 +12,9 @@ const CUSTOM_RETRY_PARAM = 'X-retry-login';
 
 let defaultChurchToolsClient = null;
 
-class ChurchToolsClient extends Object {
+class ChurchToolsClient {
 
     constructor(churchToolsBaseUrl = null, loginToken = null) {
-        super();
-
         this.churchToolsBaseUrl = churchToolsBaseUrl;
         this.ax = axios.create({
             baseURL: churchToolsBaseUrl,
@@ -24,7 +22,7 @@ class ChurchToolsClient extends Object {
             withCredentials: true
         });
 
-        axiosCookieJarSupport.default(this.ax);
+        this.ax = axiosCookieJarSupport(this.ax);
         this.ax.defaults.jar = new tough.CookieJar();
 
         this.unauthorizedInterceptor = null;
@@ -249,7 +247,8 @@ class ChurchToolsClient extends Object {
             },
             errorObject => {
                 return new Promise((resolve, reject) => {
-                    if (errorObject.config.params && errorObject.config.params[CUSTOM_RETRY_PARAM]) {
+                    if (errorObject.config && errorObject.config.params &&
+                        errorObject.config.params[CUSTOM_RETRY_PARAM]) {
                         this.notifyUnauthenticated();
                         reject(errorObject);
                     } else if (errorObject.response && errorObject.response.status === STATUS_UNAUTHORIZED) {
@@ -338,39 +337,39 @@ const get = (uri, params = {}, rawResponse = false) => {
 };
 
 const getAllPages = (uri, params = {}) => {
-    defaultChurchToolsClient.getAllPages(uri, params);
+    return defaultChurchToolsClient.getAllPages(uri, params);
 };
 
 const put = (uri, data) => {
-    defaultChurchToolsClient.put(uri, data);
+    return defaultChurchToolsClient.put(uri, data);
 };
 
 const post = (uri, data = {}) => {
-    defaultChurchToolsClient.post(uri, data);
+    return defaultChurchToolsClient.post(uri, data);
 };
 
 const deleteApi = (uri, data = {}) => {
-    defaultChurchToolsClient.deleteApi(uri, data);
+    return defaultChurchToolsClient.deleteApi(uri, data);
 };
 
 const setBaseUrl = (baseUrl) => {
-    defaultChurchToolsClient.setBaseUrl(baseUrl);
+    return defaultChurchToolsClient.setBaseUrl(baseUrl);
 };
 
 const setUnauthorizedInterceptor = (loginToken = null, personId = null) => {
-    defaultChurchToolsClient.setUnauthorizedInterceptor(loginToken, personId);
+    return defaultChurchToolsClient.setUnauthorizedInterceptor(loginToken, personId);
 };
 
 const enableCrossOriginRequests = () => {
-    defaultChurchToolsClient.enableCrossOriginRequests();
+    return defaultChurchToolsClient.enableCrossOriginRequests();
 };
 
 const onUnauthenticated = (callback) => {
-    defaultChurchToolsClient.onUnauthenticated(callback);
+    return defaultChurchToolsClient.onUnauthenticated(callback);
 };
 
 const validChurchToolsUrl = (url) => {
-    defaultChurchToolsClient.validChurchToolsUrl(url);
+    return defaultChurchToolsClient.validChurchToolsUrl(url);
 };
 
 export {

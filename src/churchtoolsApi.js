@@ -1,4 +1,4 @@
-import { oldApi, get, post, put, deleteApi, getAllPages } from './churchtoolsClient.js';
+import { oldApi, get, post, put, deleteApi, getAllPages } from './churchtoolsClient';
 
 const login = (username, password, rememberMe = true) => {
     return post('/login', {

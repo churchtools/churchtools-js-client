@@ -3,7 +3,6 @@
     "version": "0.3.18",
     "description": "Client bibliothec to interact with a ChurchTools Server.",
     "main": "dist/churchtools-client.js",
-    "type": "module",
     "scripts": {
         "test": "jest",
         "build": "webpack",
