@@ -13,7 +13,6 @@ const CUSTOM_RETRY_PARAM = 'X-retry-login';
 let defaultChurchToolsClient = null;
 
 class ChurchToolsClient {
-
     constructor(churchToolsBaseUrl = null, loginToken = null) {
         this.churchToolsBaseUrl = churchToolsBaseUrl;
         this.ax = axios.create({
@@ -48,7 +47,7 @@ class ChurchToolsClient {
         });
 
         this.ax.interceptors.response.use(response => {
-            log('Response: ', {status: response.status});
+            log('Response: ', { status: response.status });
             return response;
         });
 
@@ -69,7 +68,7 @@ class ChurchToolsClient {
     }
 
     buildOldRequestObject(func, params) {
-        return Object.assign({}, params, {func: func});
+        return Object.assign({}, params, { func: func });
     }
 
     responseToData(response) {
@@ -97,7 +96,7 @@ class ChurchToolsClient {
                     if (response.data.status === 'success') {
                         resolve(this.responseToData(response));
                     } else {
-                        reject({response: response});
+                        reject({ response: response });
                     }
                 })
                 .catch(error => {
@@ -116,7 +115,7 @@ class ChurchToolsClient {
     get(uri, params = {}, rawResponse = false) {
         return new Promise((resolve, reject) => {
             this.ax
-                .get(this.buildUrl(uri), {params: params })
+                .get(this.buildUrl(uri), { params: params })
                 .then(response => {
                     if (rawResponse) {
                         resolve(response);
@@ -152,7 +151,6 @@ class ChurchToolsClient {
             .catch(reject);
     }
 
-
     put(uri, data) {
         return new Promise((resolve, reject) => {
             this.ax
@@ -182,7 +180,7 @@ class ChurchToolsClient {
     deleteApi(uri, data = {}) {
         return new Promise((resolve, reject) => {
             this.ax
-                .delete(this.buildUrl(uri), {data: data })
+                .delete(this.buildUrl(uri), { data: data })
                 .then(response => {
                     resolve(this.responseToData(response));
                 })
@@ -217,7 +215,9 @@ class ChurchToolsClient {
                     .catch(error => {
                         if (
                             (error.response && error.response.status) === STATUS_UNAUTHORIZED ||
-                            (error.response && error.response.message && error.response.data.message === 'Session expired!')
+                            (error.response &&
+                                error.response.message &&
+                                error.response.data.message === 'Session expired!')
                         ) {
                             log('Failed to login with login token', error);
                             reject(error);
@@ -240,15 +240,18 @@ class ChurchToolsClient {
             response => {
                 if (response.data.message === 'Session expired!') {
                     response.status = STATUS_UNAUTHORIZED;
-                    return Promise.reject({response: response, config: response.config});
+                    return Promise.reject({ response: response, config: response.config });
                 } else {
                     return Promise.resolve(response);
                 }
             },
             errorObject => {
                 return new Promise((resolve, reject) => {
-                    if (errorObject.config && errorObject.config.params &&
-                        errorObject.config.params[CUSTOM_RETRY_PARAM]) {
+                    if (
+                        errorObject.config &&
+                        errorObject.config.params &&
+                        errorObject.config.params[CUSTOM_RETRY_PARAM]
+                    ) {
                         this.notifyUnauthenticated();
                         reject(errorObject);
                     } else if (errorObject.response && errorObject.response.status === STATUS_UNAUTHORIZED) {
@@ -286,7 +289,9 @@ class ChurchToolsClient {
                         }
                     } else if (response.data.build) {
                         reject({
-                            message: `The url ${url} points to a ChurchTools Installation, but its version is too old. At least version ${MINIMAL_CHURCHTOOLS_VERSION} is required.`,
+                            message:
+                                `The url ${url} points to a ChurchTools Installation, but its version is too old.` +
+                                ` At least version ${MINIMAL_CHURCHTOOLS_VERSION} is required.`,
                             messageKey: 'churchtools.url.invalidold',
                             args: {
                                 url: url,
@@ -308,7 +313,8 @@ class ChurchToolsClient {
                         log('Network error: Offline', error);
                         reject({
                             message:
-                                'Could not validate the url. Either the url is wrong or there is a problem with the internet connection',
+                                'Could not validate the url. Either the url is wrong or there is a problem with the ' +
+                                'internet connection',
                             messageKey: 'churchtools.url.offline'
                         });
                     } else {
@@ -352,7 +358,7 @@ const deleteApi = (uri, data = {}) => {
     return defaultChurchToolsClient.deleteApi(uri, data);
 };
 
-const setBaseUrl = (baseUrl) => {
+const setBaseUrl = baseUrl => {
     return defaultChurchToolsClient.setBaseUrl(baseUrl);
 };
 
@@ -364,11 +370,11 @@ const enableCrossOriginRequests = () => {
     return defaultChurchToolsClient.enableCrossOriginRequests();
 };
 
-const onUnauthenticated = (callback) => {
+const onUnauthenticated = callback => {
     return defaultChurchToolsClient.onUnauthenticated(callback);
 };
 
-const validChurchToolsUrl = (url) => {
+const validChurchToolsUrl = url => {
     return defaultChurchToolsClient.validChurchToolsUrl(url);
 };
 
