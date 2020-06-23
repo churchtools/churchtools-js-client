@@ -285,6 +285,18 @@ const getPublicGroupInfo = (groupId) => {
     return get(`/publicgroups/${groupId}`);
 };
 
+const getPermissionsGlobal = () => {
+    return get('/permissions/global');
+};
+
+const getPermissionsForPerson = (personId) => {
+    return get(`/permissions/internal/persons/${personId}`);
+};
+
+const invitePerson = (personId) => {
+    return post(`/persons/${personId}/invite`);
+};
+
 export {
     login,
     totp,
@@ -324,5 +336,8 @@ export {
     deleteAvatar,
     getEvent,
     getAllEvents,
-    getPublicGroupInfo
+    getPublicGroupInfo,
+    getPermissionsGlobal,
+    getPermissionsForPerson,
+    invitePerson
 };
