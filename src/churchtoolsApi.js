@@ -298,6 +298,10 @@ const invitePerson = (personId) => {
     return post(`/persons/${personId}/invite`);
 };
 
+const getPersonProperties = (...personIds) => {
+    return post('/persons/properties', {ids: personIds});
+};
+
 export {
     login,
     totp,
@@ -340,5 +344,6 @@ export {
     getPublicGroupInfo,
     getPermissionsGlobal,
     getPermissionsForPerson,
-    invitePerson
+    invitePerson,
+    getPersonProperties
 };
