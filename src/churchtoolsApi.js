@@ -206,7 +206,8 @@ const config = () => {
 
 const groupsForPerson = (personId, showInactiveGroups = false, showOverdueGroups = false) => {
     return get(
-        `/persons/${personId}/groups?show_overdue_groups=${showOverdueGroups}&show_inactive_groups=${showInactiveGroups}`
+        `/persons/${personId}/groups?` +
+            `show_overdue_groups=${showOverdueGroups}&show_inactive_groups=${showInactiveGroups}`
     );
 };
 
@@ -265,15 +266,15 @@ const setProfilePictureForPerson = (personId, originalWidth, originalHeight, opt
     return post(`/files/avatar/${personId}`, formData);
 };
 
-const getFileMetadata = (fileId) => {
+const getFileMetadata = fileId => {
     return get(`/files/${fileId}/metadata`);
 };
 
-const deleteAvatar = (personId) => {
+const deleteAvatar = personId => {
     return deleteApi(`/files/avatar/${personId}`);
 };
 
-const getEvent = (eventId) => {
+const getEvent = eventId => {
     return get(`/events/${eventId}`);
 };
 
@@ -281,7 +282,7 @@ const getAllEvents = () => {
     return get('/events?include=eventServices');
 };
 
-const getPublicGroupInfo = (groupId) => {
+const getPublicGroupInfo = groupId => {
     return get(`/publicgroups/${groupId}`);
 };
 
