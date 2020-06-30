@@ -255,7 +255,7 @@ class ChurchToolsClient {
                         this.notifyUnauthenticated();
                         reject(errorObject);
                     } else if (errorObject.response && errorObject.response.status === STATUS_UNAUTHORIZED) {
-                        log('Got 401 session expired', errorObject);
+                        log('Got 401 session expired');
                         if (loginToken) {
                             this.retryWithLogin(errorObject.config, loginToken, personId, resolve, reject, errorObject);
                         } else {
