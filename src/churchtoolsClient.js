@@ -177,6 +177,19 @@ class ChurchToolsClient {
         });
     }
 
+    patch(uri, data = {}) {
+        return new Promise((resolve, reject) => {
+            this.ax
+                .patch(this.buildUrl(uri), data)
+                .then(response => {
+                    resolve(this.responseToData(response));
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        });
+    }
+
     deleteApi(uri, data = {}) {
         return new Promise((resolve, reject) => {
             this.ax
@@ -354,6 +367,10 @@ const post = (uri, data = {}) => {
     return defaultChurchToolsClient.post(uri, data);
 };
 
+const patch = (uri, data = {}) => {
+    return defaultChurchToolsClient.patch(uri, data);
+};
+
 const deleteApi = (uri, data = {}) => {
     return defaultChurchToolsClient.deleteApi(uri, data);
 };
@@ -384,6 +401,7 @@ export {
     get,
     put,
     post,
+    patch,
     deleteApi,
     setBaseUrl,
     setUnauthorizedInterceptor,

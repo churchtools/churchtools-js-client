@@ -290,16 +290,16 @@ const getPermissionsGlobal = () => {
     return get('/permissions/global');
 };
 
-const getPermissionsForPerson = (personId) => {
+const getPermissionsForPerson = personId => {
     return get(`/permissions/internal/persons/${personId}`);
 };
 
-const invitePerson = (personId) => {
+const invitePerson = personId => {
     return post(`/persons/${personId}/invite`);
 };
 
 const getPersonProperties = (...personIds) => {
-    return post('/persons/properties', {ids: personIds});
+    return post('/persons/properties', { ids: personIds });
 };
 
 export {
