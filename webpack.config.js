@@ -13,7 +13,7 @@ const webConfig = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: /(node_modules)/,
+                exclude: /node_modules\/(?!(tough-cookie)\/).*/,
                 use: {
                     loader: 'babel-loader'
                 }
@@ -47,4 +47,4 @@ const nodejsConfig = {
     devtool: 'source-map'
 };
 
-module.exports = [ webConfig, nodejsConfig ];
+module.exports = [webConfig, nodejsConfig];
