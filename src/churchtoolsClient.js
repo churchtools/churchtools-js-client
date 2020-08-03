@@ -15,6 +15,7 @@ let defaultChurchToolsClient = null;
 class ChurchToolsClient {
     constructor(churchToolsBaseUrl = null, loginToken = null) {
         this.churchToolsBaseUrl = churchToolsBaseUrl;
+        this.csrfToken = null;
         this.ax = axios.create({
             baseURL: churchToolsBaseUrl,
             timeout: DEFAULT_TIMEOUT,
@@ -86,11 +87,26 @@ class ChurchToolsClient {
      */
     oldApi(module, func, params) {
         return new Promise((resolve, reject) => {
-            this.ax
-                .request({
-                    url: `${this.churchToolsBaseUrl}/?q=${module}`,
-                    method: 'POST',
-                    params: this.buildOldRequestObject(func, params)
+            Promise.resolve(true)
+                .then(() => {
+                    if (this.csrfToken) {
+                        return true;
+                    }
+                    return this.get('/csrftoken')
+                        .then(response => {
+                            this.csrfToken = response;
+                            return true;
+                        });
+                })
+                .then(() => {
+                    return this.ax.request({
+                        url: `${this.churchToolsBaseUrl}/?q=${module}`,
+                        method: 'POST',
+                        headers: {
+                            'CSRF-Token': this.csrfToken
+                        },
+                        params: this.buildOldRequestObject(func, params)
+                    });
                 })
                 .then(response => {
                     if (response.data.status === 'success') {
@@ -223,6 +239,7 @@ class ChurchToolsClient {
                     .request(config)
                     .then(response => {
                         log('Successfully logged in again with login token');
+                        this.csrfToken = null;
                         resolve(response);
                     })
                     .catch(error => {
