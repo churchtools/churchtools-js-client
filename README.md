@@ -56,8 +56,6 @@ Hiefür werden die Pakete `axios-cookiejar-support` und `tough-cookie` benötigt
 ```
 let axiosCookieJarSupport = require('axios-cookiejar-support');
 let tough = require('tough-cookie');
-
-activateLogging();
 churchtoolsClient.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
 ```
 

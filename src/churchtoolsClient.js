@@ -11,9 +11,10 @@ const CUSTOM_RETRY_PARAM = 'X-retry-login';
 let defaultChurchToolsClient = null;
 
 class ChurchToolsClient {
-    constructor(churchToolsBaseUrl = null, loginToken = null) {
+    constructor(churchToolsBaseUrl = null, loginToken = null, loadCSRFForOldApi = false) {
         this.churchToolsBaseUrl = churchToolsBaseUrl;
         this.csrfToken = null;
+        this.loadCSRFForOldApi = loadCSRFForOldApi;
         this.ax = axios.create({
             baseURL: churchToolsBaseUrl,
             timeout: DEFAULT_TIMEOUT,
@@ -81,6 +82,7 @@ class ChurchToolsClient {
      * @returns {Promise}
      */
     oldApi(module, func, params) {
+        this.loadCSRFForOldApi = true;
         return new Promise((resolve, reject) => {
             Promise.resolve(true)
                 .then(() => {
@@ -113,6 +115,10 @@ class ChurchToolsClient {
                     reject(error);
                 });
         });
+    }
+
+    setLoadCSRFForOldAPI() {
+        this.loadCSRFForOldApi = true;
     }
 
     buildUrl(uri) {
@@ -229,11 +235,27 @@ class ChurchToolsClient {
             [CUSTOM_RETRY_PARAM]: true
         })
             .then(() => {
+                log('Successfully logged in again with login token');
+                if (this.csrfToken || !this.loadCSRFForOldApi) {
+                    this.csrfToken = null;
+                    return true;
+                }
+                return this.get('/csrftoken').then(response => {
+                    this.csrfToken = response;
+                    return true;
+                });
+            })
+            .then(() => {
+                if (config.headers) {
+                    config.headers['CSRF-Token'] = this.csrfToken;
+                } else {
+                    config.headers = {
+                        'CSRF-Token': this.csrfToken
+                    };
+                }
                 this.ax
                     .request(config)
                     .then(response => {
-                        log('Successfully logged in again with login token');
-                        this.csrfToken = null;
                         resolve(response);
                     })
                     .catch(error => {
@@ -414,6 +436,10 @@ const setCookieJar = (axiosCookieJarSupport, jar) => {
     return defaultChurchToolsClient.setCookieJar(axiosCookieJarSupport, jar);
 };
 
+const setLoadCSRFForOldAPI = () => {
+    return defaultChurchToolsClient.setLoadCSRFForOldAPI();
+};
+
 export {
     ChurchToolsClient,
     oldApi,
@@ -428,5 +454,6 @@ export {
     onUnauthenticated,
     validChurchToolsUrl,
     getAllPages,
-    setCookieJar
+    setCookieJar,
+    setLoadCSRFForOldAPI
 };
