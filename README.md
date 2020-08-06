@@ -32,22 +32,34 @@ if (result.status === 'success') {
 
 Es existiert im dist-Verzeichnis ein extra Webpack-Bundle für node.js.
 
- ```
+```
 const ctcPackage = require('churchtools-client/dist/churchtools-client-node.js').churchtoolsClient;
 const { churchtoolsApi, churchtoolsClient, activateLogging } = ctcPackage;
- 
+
 if (__DEV__) {
-    activateLogging();
+   activateLogging();
 }
 
 churchtoolsClient.setBaseUrl('https://foobar.church.tools');
 const result = await churchtoolsApi.login(this.state.username, this.state.password);
 if (result.status === 'success') {
-    console.log('Login successful!');
-    const whoami = await churchtoolsClient.get('/whoami');
-    console.dir(whoami);
+   console.log('Login successful!');
+   const whoami = await churchtoolsClient.get('/whoami');
+   console.dir(whoami);
 }
- ```
+```
+
+## Cookies in einer Node.js ANwendung
+
+Hiefür werden die Pakete `axios-cookiejar-support` und `tough-cookie` benötigt.
+
+```
+let axiosCookieJarSupport = require('axios-cookiejar-support');
+let tough = require('tough-cookie');
+
+activateLogging();
+churchtoolsClient.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
+```
 
 ## Auf mehrere ChurchTools-Installationen gleichzeitig zugreifen
 
@@ -56,10 +68,11 @@ Wenn auf mehrere ChurchTools-Installationen gleichzeitig zugegriffen werden soll
 Aus diesem Grund gibt es die Möglichkeit, den `ChurchToolsClient` als Objekt zu instantiieren. Alle Basis-Funktionen aus `churchtoolsClient.js` können dann über dieses Objekt ausgeführt werden. Für die vordefinierten API-Calls aus `churchtoolsApi.js` besteht diese Möglichkeit noch nicht.
 
 Beispiel mit dem Node.js-Bundle:
+
 ```
 const ctcPackage = require('churchtools-client/dist/churchtools-client-node.js').churchtoolsClient;
 const ChurchToolsClient = ctcPackage.churchtoolsClient.ChurchToolsClient;
- 
+
 const clientA = new ChurchToolsClient();
 clientA.setBaseUrl('https://foobar.church.tools');
 clientA.post('/login', {
@@ -87,7 +100,7 @@ clientB.post('/login', {
 }).then(result => {
     console.log('User B: ', result.data);
 });
-``` 
+```
 
 ## Release-Version bauen
 
@@ -95,4 +108,3 @@ clientB.post('/login', {
 2. Änderungen im `build` Ordner comitten.
 3. Neuen Tag erstellen `git tag v0.1.2`
 4. Tag und code pushen `git push --tags`
-
