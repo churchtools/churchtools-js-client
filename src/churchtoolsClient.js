@@ -1,6 +1,4 @@
 import axios from 'axios';
-import axiosCookieJarSupport from 'axios-cookiejar-support';
-import tough from 'tough-cookie';
 import { log } from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 
@@ -21,9 +19,6 @@ class ChurchToolsClient {
             timeout: DEFAULT_TIMEOUT,
             withCredentials: true
         });
-
-        this.ax = axiosCookieJarSupport(this.ax);
-        this.ax.defaults.jar = new tough.CookieJar();
 
         this.unauthorizedInterceptor = null;
         this.unauthenticatedCallbacks = [];
@@ -92,11 +87,10 @@ class ChurchToolsClient {
                     if (this.csrfToken) {
                         return true;
                     }
-                    return this.get('/csrftoken')
-                        .then(response => {
-                            this.csrfToken = response;
-                            return true;
-                        });
+                    return this.get('/csrftoken').then(response => {
+                        this.csrfToken = response;
+                        return true;
+                    });
                 })
                 .then(() => {
                     return this.ax.request({
@@ -360,6 +354,10 @@ class ChurchToolsClient {
                 });
         });
     }
+    setCookieJar(axiosCookieJarSupport, jar) {
+        this.ax = axiosCookieJarSupport(this.ax);
+        this.ax.defaults.jar = jar;
+    }
 }
 
 defaultChurchToolsClient = new ChurchToolsClient();
@@ -412,6 +410,10 @@ const validChurchToolsUrl = url => {
     return defaultChurchToolsClient.validChurchToolsUrl(url);
 };
 
+const setCookieJar = (axiosCookieJarSupport, jar) => {
+    return defaultChurchToolsClient.setCookieJar(axiosCookieJarSupport, jar);
+};
+
 export {
     ChurchToolsClient,
     oldApi,
@@ -425,5 +427,6 @@ export {
     enableCrossOriginRequests,
     onUnauthenticated,
     validChurchToolsUrl,
-    getAllPages
+    getAllPages,
+    setCookieJar
 };

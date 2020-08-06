@@ -13,7 +13,7 @@ const webConfig = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: /node_modules\/(?!(tough-cookie)\/).*/,
+                exclude: /(node_modules)/,
                 use: {
                     loader: 'babel-loader'
                 }
