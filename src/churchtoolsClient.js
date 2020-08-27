@@ -77,11 +77,11 @@ class ChurchToolsClient {
      *
      * @param {string} module defines which module that should be queried
      * @param {string} func defines the function that should be called in the module
-     * @param {string} params additional params passed to the called function
+     * @param {object} params additional params passed to the called function
      *
      * @returns {Promise}
      */
-    oldApi(module, func, params) {
+    oldApi(module, func, params = {}) {
         this.loadCSRFForOldApi = true;
         return new Promise((resolve, reject) => {
             Promise.resolve(true)
@@ -95,14 +95,15 @@ class ChurchToolsClient {
                     });
                 })
                 .then(() => {
-                    return this.ax.request({
-                        url: `${this.churchToolsBaseUrl}/?q=${module}`,
-                        method: 'POST',
-                        headers: {
-                            'CSRF-Token': this.csrfToken
-                        },
-                        params: this.buildOldRequestObject(func, params)
-                    });
+                    return this.ax.post(
+                        `${this.churchToolsBaseUrl}/?q=${module}`,
+                        this.buildOldRequestObject(func, params),
+                        {
+                            headers: {
+                                'CSRF-Token': this.csrfToken
+                            }
+                        }
+                    );
                 })
                 .then(response => {
                     if (response.data.status === 'success') {

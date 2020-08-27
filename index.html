@@ -114,6 +114,12 @@
                 },
                 getPersonProperties: () => {
                     return api.getPersonProperties(1, 7, 16)
+                },
+                getPersonMasterData: () => {
+                    return client.oldApi('churchdb/ajax', 'getMasterData')
+                },
+                getPersonDetails: () => {
+                    return client.oldApi('churchdb/ajax', 'getPersonDetails', {id: 7})
                 }
             };
 
