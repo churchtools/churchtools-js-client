@@ -307,6 +307,29 @@ const getPersonProperties = (...personIds) => {
     return post('/persons/properties', { ids: personIds });
 };
 
+const getMemberfields = groupId => {
+    return get(`/groups/${groupId}/memberfields`);
+};
+
+const updateGroupMember = (groupId, personId, data) => {
+    /*
+     * Format of `data`:
+     * {
+     *   "groupTypeRoleId": 0,
+     *   "comment": "string",
+     *   "memberStartDate": "2020-09-04",
+     *   "memberEndDate": "2020-09-04",
+     *   "fields": {
+     *     "12": true,
+     *     "14": "Text",
+     *     "17": null
+     *   }
+     * }
+     */
+
+    return put(`/groups/${groupId}/members/${personId}`, data);
+};
+
 export {
     login,
     totp,
@@ -351,5 +374,7 @@ export {
     getPermissionsForPerson,
     getPermissionsForGroup,
     invitePerson,
-    getPersonProperties
+    getPersonProperties,
+    getMemberfields,
+    updateGroupMember
 };

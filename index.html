@@ -123,6 +123,12 @@
                 },
                 getPersonDetails: () => {
                     return client.oldApi('churchdb/ajax', 'getPersonDetails', {id: 7})
+                },
+                getMemberfields: () => {
+                    return api.getMemberfields(9);
+                },
+                updateGroupMember: () => {
+                    return api.updateGroupMember(9, 10, { fields: { 1: false } });
                 }
             };
 
