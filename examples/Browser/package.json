@@ -1,0 +1,14 @@
+{
+  "name": "churchtools-js-client-webdemo",
+  "version": "1.0.0",
+  "description": "Simple web browser application for churchtools-js-client",
+  "scripts": {
+    "start": "http-server"
+  },
+  "author": "Jan Pawellek <jpawellek@churchtools.de>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@churchtools/churchtools-client": "^0.5.1",
+    "http-server": "^0.12.3"
+  }
+}

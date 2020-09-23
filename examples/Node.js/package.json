@@ -1,0 +1,16 @@
+{
+  "name": "churchtools-js-client-demo",
+  "version": "1.0.0",
+  "description": "Simple demo application for churchtools-js-client",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Jan Pawellek <jpawellek@churchtools.de>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "axios-cookiejar-support": "^1.0.0",
+    "@churchtools/churchtools-client": "^0.5.1",
+    "tough-cookie": "^4.0.0"
+  }
+}

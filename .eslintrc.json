@@ -13,13 +13,15 @@
         "afterEach": true,
         "jest": true,
         "expect": true,
-        "describe": true
+        "describe": true,
+        "require": true
     },
     "rules": {
         "indent": ["error", 4],
         "linebreak-style": ["error", "unix"],
         "quotes": ["error", "single"],
         "semi": ["error", "always"],
-        "max-len": ["error", 120]
+        "max-len": ["error", 120],
+        "no-console": "off"
     }
 }
