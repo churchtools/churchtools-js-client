@@ -8,6 +8,7 @@
         "build": "webpack",
         "watch": "webpack --watch",
         "prettier": "prettier --write \"src/**/*.js\"",
+        "prettier-list-different": "prettier --list-different \"src/**/*.js\"",
         "eslint": "eslint src/**/*.js"
     },
     "keywords": [

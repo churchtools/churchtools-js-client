@@ -294,7 +294,6 @@ const getPermissionsForPerson = personId => {
     return get(`/permissions/internal/persons/${personId}`);
 };
 
-
 const getPermissionsForGroup = groupId => {
     return get(`/permissions/internal/groups/${groupId}`);
 };
