@@ -1,7 +1,7 @@
 {
-    "name": "churchtools-client",
-    "version": "0.4.12",
-    "description": "Client bibliothec to interact with a ChurchTools Server.",
+    "name": "@churchtools/churchtools-client",
+    "version": "0.5.0",
+    "description": "Client library to interact with a ChurchTools Server.",
     "main": "dist/churchtools-client.js",
     "scripts": {
         "test": "jest",
@@ -32,5 +32,16 @@
     },
     "jest": {
         "testURL": "http://localhost/"
-    }
+    },
+    "directories": {
+        "test": "test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/churchtools/churchtools-js-client.git"
+    },
+    "bugs": {
+        "url": "https://github.com/churchtools/churchtools-js-client/issues"
+    },
+    "homepage": "https://github.com/churchtools/churchtools-js-client#readme"
 }
