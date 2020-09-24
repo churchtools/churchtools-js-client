@@ -1,6 +1,6 @@
 {
     "name": "@churchtools/churchtools-client",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "description": "Client library to interact with a ChurchTools Server.",
     "main": "dist/churchtools-client.js",
     "scripts": {
