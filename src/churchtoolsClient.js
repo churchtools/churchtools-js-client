@@ -303,7 +303,14 @@ class ChurchToolsClient {
 
         this.unauthorizedInterceptor = this.ax.interceptors.response.use(
             response => {
-                if (response.data === 'Session expired!' || response.data.message === 'Session expired!') {
+                // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
+                // So technically we should be here only in case of a successful request.
+                // However, the old ChurchTools API returns { message: 'Session expired' } and a 200 status code
+                // in case the user is not currently authorized. That's why we need to fetch and handle this case here.
+                // Additionally for some unknown reason, when using axios-cookiejar-support Axios also calls
+                // onFullfilled instead of onRejected in case of a 401. That's why we also check for
+                // STATUS_UNAUTHORIZED here and handle this case accordingly.
+                if (response.status === STATUS_UNAUTHORIZED || response.data.message === 'Session expired!') {
                     response.status = STATUS_UNAUTHORIZED;
                     return handleUnauthorized(response);
                 } else {
