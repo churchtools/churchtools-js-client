@@ -1,8 +1,8 @@
 
 // Settings: Please set accordingly to run this demo.
-const BASEURL = 'https://testjan.church.tools';
-const USERNAME = 'eva';
-const PASSWORD = 'ChurchTools2018';
+const BASEURL = 'https://demo.church.tools';
+const USERNAME = 'please-replace';
+const PASSWORD = 'please-replace';
 const LOGGING = false;
 // End of Settings
 

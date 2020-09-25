@@ -283,36 +283,41 @@ class ChurchToolsClient {
         if (this.unauthorizedInterceptor) {
             this.ax.interceptors.response.eject(this.unauthorizedInterceptor);
         }
+
+        const handleUnauthorized = response =>
+            new Promise((resolve, reject) => {
+                if (response.config && response.config.params && response.config.params[CUSTOM_RETRY_PARAM]) {
+                    this.notifyUnauthenticated();
+                    reject(response);
+                } else if (response && response.status === STATUS_UNAUTHORIZED) {
+                    log('Got 401 session expired');
+                    if (loginToken) {
+                        this.retryWithLogin(response.config, loginToken, personId, resolve, reject, response);
+                    } else {
+                        this.notifyUnauthenticated();
+                    }
+                } else {
+                    reject(response);
+                }
+            });
+
         this.unauthorizedInterceptor = this.ax.interceptors.response.use(
             response => {
-                if (response.data.message === 'Session expired!') {
+                // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
+                // So technically we should be here only in case of a successful request.
+                // However, the old ChurchTools API returns { message: 'Session expired' } and a 200 status code
+                // in case the user is not currently authorized. That's why we need to fetch and handle this case here.
+                // Additionally for some unknown reason, when using axios-cookiejar-support Axios also calls
+                // onFullfilled instead of onRejected in case of a 401. That's why we also check for
+                // STATUS_UNAUTHORIZED here and handle this case accordingly.
+                if (response.status === STATUS_UNAUTHORIZED || response.data.message === 'Session expired!') {
                     response.status = STATUS_UNAUTHORIZED;
-                    return Promise.reject({ response: response, config: response.config });
+                    return handleUnauthorized(response);
                 } else {
                     return Promise.resolve(response);
                 }
             },
-            errorObject => {
-                return new Promise((resolve, reject) => {
-                    if (
-                        errorObject.config &&
-                        errorObject.config.params &&
-                        errorObject.config.params[CUSTOM_RETRY_PARAM]
-                    ) {
-                        this.notifyUnauthenticated();
-                        reject(errorObject);
-                    } else if (errorObject.response && errorObject.response.status === STATUS_UNAUTHORIZED) {
-                        log('Got 401 session expired');
-                        if (loginToken) {
-                            this.retryWithLogin(errorObject.config, loginToken, personId, resolve, reject, errorObject);
-                        } else {
-                            this.notifyUnauthenticated();
-                        }
-                    } else {
-                        reject(errorObject);
-                    }
-                });
-            }
+            errorObject => handleUnauthorized(errorObject.response)
         );
     }
 
