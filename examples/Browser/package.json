@@ -8,7 +8,7 @@
   "author": "Jan Pawellek <jpawellek@churchtools.de>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@churchtools/churchtools-client": "^0.5.1",
+    "@churchtools/churchtools-client": "^0.5.2",
     "http-server": "^0.12.3"
   }
 }
