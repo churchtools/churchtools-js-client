@@ -137,7 +137,7 @@ class ChurchToolsClient {
                     if (rawResponse) {
                         resolve(response);
                     } else {
-                        resolve(this.responseToData(response));
+                        resolve(this.responseToData(response), response);
                     }
                 })
                 .catch(error => {
@@ -173,7 +173,7 @@ class ChurchToolsClient {
             this.ax
                 .put(this.buildUrl(uri), data)
                 .then(response => {
-                    resolve(this.responseToData(response));
+                    resolve(this.responseToData(response), response);
                 })
                 .catch(error => {
                     reject(error);
@@ -186,7 +186,7 @@ class ChurchToolsClient {
             this.ax
                 .post(this.buildUrl(uri), data)
                 .then(response => {
-                    resolve(this.responseToData(response));
+                    resolve(this.responseToData(response), response);
                 })
                 .catch(error => {
                     reject(error);
@@ -199,7 +199,7 @@ class ChurchToolsClient {
             this.ax
                 .patch(this.buildUrl(uri), data)
                 .then(response => {
-                    resolve(this.responseToData(response));
+                    resolve(this.responseToData(response), response);
                 })
                 .catch(error => {
                     reject(error);
@@ -212,7 +212,7 @@ class ChurchToolsClient {
             this.ax
                 .delete(this.buildUrl(uri), { data: data })
                 .then(response => {
-                    resolve(this.responseToData(response));
+                    resolve(this.responseToData(response), response);
                 })
                 .catch(error => {
                     reject(error);
