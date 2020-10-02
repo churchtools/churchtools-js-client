@@ -280,7 +280,7 @@ class ChurchToolsClient {
     }
 
     setUnauthorizedInterceptor(loginToken = null, personId = null) {
-        if (this.unauthorizedInterceptor === null) {
+        if (this.unauthorizedInterceptor !== null) {
             this.ax.interceptors.response.eject(this.unauthorizedInterceptor);
         }
 
