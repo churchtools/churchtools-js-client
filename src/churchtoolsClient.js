@@ -25,26 +25,12 @@ class ChurchToolsClient {
         this.unauthenticatedCallbacks = [];
 
         this.ax.interceptors.request.use(request => {
-            let params = request.params;
-            let loginToken = null;
-            if (params && params['login_token']) {
-                loginToken = params['login_token'];
-                delete params['login_token'];
-            }
-            log('Starting Request ', {
-                baseUrl: this.churchToolsBaseUrl,
-                url: request.url,
-                method: request.method,
-                params: params
-            });
-            if (loginToken) {
-                params['login_token'] = loginToken;
-            }
+            log('Starting Request ', request);
             return request;
         });
 
         this.ax.interceptors.response.use(response => {
-            log('Response: ', { status: response.status });
+            log('Response: ', response);
             return response;
         });
 
