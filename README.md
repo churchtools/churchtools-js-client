@@ -47,7 +47,7 @@ The import of the package slightly differs in a web application from a Node.js a
 
 ### Web Application
 
-```
+```html
 <script src="node_modules/@churchtools/churchtools-client/dist/churchtools-client.js"></script>
 <script>
     const { churchtoolsClient, activateLogging } = window.churchtoolsClient;
@@ -69,7 +69,7 @@ running in your browser.
 
 ### Node.js Application
 
-```
+```js
 const { churchtoolsClient, activateLogging } = require('@churchtools/churchtools-client');
 const axiosCookieJarSupport = require('axios-cookiejar-support');
 const tough = require('tough-cookie');
@@ -118,7 +118,7 @@ If your application needs to access multiple ChurchTools instances simultaneousl
 Instead, an object-wrapped approach can be used to manage and call multiple instances. This is an example for a Node.js
 application:
 
-```
+```js
 const { churchtoolsClient, activateLogging } = require('@churchtools/churchtools-client');
 const ChurchToolsClient = churchtoolsClient.ChurchToolsClient;
 
