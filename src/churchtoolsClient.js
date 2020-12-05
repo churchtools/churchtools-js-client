@@ -17,7 +17,6 @@ class ChurchToolsClient {
         this.loadCSRFForOldApi = loadCSRFForOldApi;
         this.ax = axios.create({
             baseURL: churchToolsBaseUrl,
-            timeout: DEFAULT_TIMEOUT,
             withCredentials: true
         });
 
@@ -58,6 +57,14 @@ class ChurchToolsClient {
         return response.data.data ? response.data.data : response.data;
     }
 
+    getCancelToken() {
+        let source = axios.CancelToken.source();
+        setTimeout(() => {
+            source.cancel('Timeout');
+        }, DEFAULT_TIMEOUT);
+        return source.token;
+    }
+
     /**
      * Calls the old ChurchTools Api
      *
@@ -87,7 +94,8 @@ class ChurchToolsClient {
                         {
                             headers: {
                                 'CSRF-Token': this.csrfToken
-                            }
+                            },
+                            cancelToken: this.getCancelToken()
                         }
                     );
                 })
@@ -118,7 +126,7 @@ class ChurchToolsClient {
     get(uri, params = {}, rawResponse = false) {
         return new Promise((resolve, reject) => {
             this.ax
-                .get(this.buildUrl(uri), { params: params })
+                .get(this.buildUrl(uri), { params: params, cancelToken: this.getCancelToken() })
                 .then(response => {
                     if (rawResponse) {
                         resolve(response);
@@ -157,7 +165,7 @@ class ChurchToolsClient {
     put(uri, data) {
         return new Promise((resolve, reject) => {
             this.ax
-                .put(this.buildUrl(uri), data)
+                .put(this.buildUrl(uri), data, { cancelToken: this.getCancelToken() })
                 .then(response => {
                     resolve(this.responseToData(response), response);
                 })
@@ -170,7 +178,7 @@ class ChurchToolsClient {
     post(uri, data = {}) {
         return new Promise((resolve, reject) => {
             this.ax
-                .post(this.buildUrl(uri), data)
+                .post(this.buildUrl(uri), data, { cancelToken: this.getCancelToken() })
                 .then(response => {
                     resolve(this.responseToData(response), response);
                 })
@@ -183,7 +191,7 @@ class ChurchToolsClient {
     patch(uri, data = {}) {
         return new Promise((resolve, reject) => {
             this.ax
-                .patch(this.buildUrl(uri), data)
+                .patch(this.buildUrl(uri), data, { cancelToken: this.getCancelToken() })
                 .then(response => {
                     resolve(this.responseToData(response), response);
                 })
@@ -196,7 +204,7 @@ class ChurchToolsClient {
     deleteApi(uri, data = {}) {
         return new Promise((resolve, reject) => {
             this.ax
-                .delete(this.buildUrl(uri), { data: data })
+                .delete(this.buildUrl(uri), { data: data, cancelToken: this.getCancelToken() })
                 .then(response => {
                     resolve(this.responseToData(response), response);
                 })
@@ -240,6 +248,7 @@ class ChurchToolsClient {
                         'CSRF-Token': this.csrfToken
                     };
                 }
+                config.cancelToken = this.getCancelToken();
                 this.ax
                     .request(config)
                     .then(response => {
@@ -318,7 +327,7 @@ class ChurchToolsClient {
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
             this.ax
-                .get(infoEndpoint)
+                .get(infoEndpoint, { cancelToken: this.getCancelToken() })
                 .then(response => {
                     const build = parseInt(response.data.build);
                     if (build >= MINIMAL_CHURCHTOOLS_BUILD_VERSION) {
