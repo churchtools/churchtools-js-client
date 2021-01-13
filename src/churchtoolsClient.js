@@ -6,6 +6,7 @@ const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
 const DEFAULT_TIMEOUT = 15000;
 const STATUS_UNAUTHORIZED = 401;
+const STATUS_RATELIMITED = 429;
 const CUSTOM_RETRY_PARAM = 'X-retry-login';
 
 let defaultChurchToolsClient = null;
@@ -33,7 +34,11 @@ class ChurchToolsClient {
             return response;
         });
 
+        this.setRateLimitInterceptor();
+
         this.setUnauthorizedInterceptor(loginToken);
+
+        this.rateLimitTimeout = 30000;
     }
 
     /**
@@ -43,6 +48,16 @@ class ChurchToolsClient {
      */
     setBaseUrl(baseUrl) {
         this.churchToolsBaseUrl = baseUrl.replace(/\/$/, '');
+    }
+
+    setRateLimitTimeout(timeoutInMs) {
+        this.rateLimitTimeout = timeoutInMs;
+    }
+
+    delay(t, v) {
+        return new Promise(function(resolve) {
+            setTimeout(resolve.bind(null, v), t);
+        });
     }
 
     enableCrossOriginRequests() {
@@ -322,7 +337,45 @@ class ChurchToolsClient {
         this.unauthenticatedCallbacks.push(callback);
     }
 
-    validChurchToolsUrl(url) {
+    setRateLimitInterceptor() {
+        const handleRateLimited = (response, errorObject) =>
+            new Promise((resolve, reject) => {
+                if (response && response.status === STATUS_RATELIMITED) {
+                    log('rate limit reached, waiting ' + this.rateLimitTimeout + ' milliseconds.');
+                    this.delay(this.rateLimitTimeout)
+                        .then(() => {
+                            response.config.cancelToken = this.getCancelToken();
+                            return this.ax.request(response.config);
+                        })
+                        .then(response => {
+                            resolve(response);
+                        })
+                        .catch(error => {
+                            reject(error);
+                        });
+                } else {
+                    reject(errorObject || response);
+                }
+            });
+
+        this.ax.interceptors.response.use(
+            response => {
+                // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
+                // So technically we should be here only in case of a successful request.
+                // However, for some unknown reason, when using axios-cookiejar-support Axios also calls
+                // onFullfilled instead of onRejected in case of a 429. That's why we also check for
+                // STATUS_RATELIMITED here and handle this case accordingly.
+                if (response.status === STATUS_RATELIMITED) {
+                    return handleRateLimited(response);
+                } else {
+                    return Promise.resolve(response);
+                }
+            },
+            errorObject => handleRateLimited(errorObject.response, errorObject)
+        );
+    }
+
+    validChurchToolsUrl(url, minimalBuildNumber = null, minimalVersion = null) {
         const infoApiPath = '/api/info';
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
@@ -330,7 +383,11 @@ class ChurchToolsClient {
                 .get(infoEndpoint, { cancelToken: this.getCancelToken() })
                 .then(response => {
                     const build = parseInt(response.data.build);
-                    if (build >= MINIMAL_CHURCHTOOLS_BUILD_VERSION) {
+                    const compareBuild = minimalBuildNumber ? minimalBuildNumber : MINIMAL_CHURCHTOOLS_BUILD_VERSION;
+                    if (!minimalVersion) {
+                        minimalVersion = MINIMAL_CHURCHTOOLS_VERSION;
+                    }
+                    if (build >= compareBuild) {
                         if (response.request.responseURL !== infoEndpoint && response.request.responseURL) {
                             resolve(response.request.responseURL.slice(0, -infoApiPath.length));
                         } else {
@@ -340,11 +397,11 @@ class ChurchToolsClient {
                         reject({
                             message:
                                 `The url ${url} points to a ChurchTools Installation, but its version is too old.` +
-                                ` At least version ${MINIMAL_CHURCHTOOLS_VERSION} is required.`,
+                                ` At least version ${minimalVersion} is required.`,
                             messageKey: 'churchtools.url.invalidold',
                             args: {
                                 url: url,
-                                minimalChurchToolsVersion: MINIMAL_CHURCHTOOLS_VERSION
+                                minimalChurchToolsVersion: minimalVersion
                             }
                         });
                     } else {
@@ -443,6 +500,10 @@ const setLoadCSRFForOldAPI = () => {
     return defaultChurchToolsClient.setLoadCSRFForOldAPI();
 };
 
+const setRateLimitTimeout = timeoutInMs => {
+    return defaultChurchToolsClient.setRateLimitTimeout(timeoutInMs);
+};
+
 export {
     ChurchToolsClient,
     oldApi,
@@ -458,5 +519,6 @@ export {
     validChurchToolsUrl,
     getAllPages,
     setCookieJar,
-    setLoadCSRFForOldAPI
+    setLoadCSRFForOldAPI,
+    setRateLimitTimeout
 };
