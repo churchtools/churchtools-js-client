@@ -23,6 +23,7 @@ class ChurchToolsClient {
 
         this.unauthorizedInterceptor = null;
         this.unauthenticatedCallbacks = [];
+        this.rateLimitInterceptor = null;
 
         this.ax.interceptors.request.use(request => {
             log('Starting Request ', request);
@@ -33,8 +34,6 @@ class ChurchToolsClient {
             log('Response: ', response);
             return response;
         });
-
-        this.setRateLimitInterceptor();
 
         this.setUnauthorizedInterceptor(loginToken);
 
@@ -337,7 +336,14 @@ class ChurchToolsClient {
         this.unauthenticatedCallbacks.push(callback);
     }
 
-    setRateLimitInterceptor() {
+    setRateLimitInterceptor(timeoutInMs = null) {
+        if (timeoutInMs) {
+            this.setRateLimitTimeout(timeoutInMs);
+        }
+        if (this.rateLimitInterceptor !== null) {
+            this.ax.interceptors.response.eject(this.rateLimitInterceptor);
+        }
+
         const handleRateLimited = (response, errorObject) =>
             new Promise((resolve, reject) => {
                 if (response && response.status === STATUS_RATELIMITED) {
@@ -358,7 +364,7 @@ class ChurchToolsClient {
                 }
             });
 
-        this.ax.interceptors.response.use(
+        this.rateLimitInterceptor = this.ax.interceptors.response.use(
             response => {
                 // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
                 // So technically we should be here only in case of a successful request.
@@ -504,6 +510,10 @@ const setRateLimitTimeout = timeoutInMs => {
     return defaultChurchToolsClient.setRateLimitTimeout(timeoutInMs);
 };
 
+const setRateLimitInterceptor = (timeoutInMs = null) => {
+    return defaultChurchToolsClient.setRateLimitInterceptor(timeoutInMs);
+};
+
 export {
     ChurchToolsClient,
     oldApi,
@@ -520,5 +530,6 @@ export {
     getAllPages,
     setCookieJar,
     setLoadCSRFForOldAPI,
-    setRateLimitTimeout
+    setRateLimitTimeout,
+    setRateLimitInterceptor
 };
