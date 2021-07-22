@@ -191,11 +191,11 @@ class ChurchToolsClient {
 
     post(uri, data = {}) {
         // FormData will be sent as multipart/form-data and the CT server requires a CSRF token for such a request
-        const isFormData = data instanceof FormData;
+        const needsCsrfToken = data && data.constructor && data.constructor.name === 'FormData';
         return new Promise((resolve, reject) => {
             Promise.resolve()
                 .then(() => {
-                    if (!isFormData || this.csrfToken) {
+                    if (!needsCsrfToken || this.csrfToken) {
                         return Promise.resolve();
                     }
                     return this.get('/csrftoken').then(response => {
@@ -204,7 +204,7 @@ class ChurchToolsClient {
                 })
                 .then(() => {
                     const config = { cancelToken: this.getCancelToken() };
-                    if (isFormData) {
+                    if (needsCsrfToken) {
                         config.headers = {
                             'CSRF-Token': this.csrfToken
                         };
