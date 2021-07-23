@@ -1,4 +1,4 @@
-import { activateLogging, log, deactivateLoggging } from '../src/logging';
+import { activateLogging, logMessage, deactivateLogging } from '../src/logging';
 
 let logStore = '';
 let logFuncSave = undefined;
@@ -12,30 +12,30 @@ beforeEach(() => {
 
 afterEach(() => {
     console.log = logFuncSave; //eslint-disable-line no-console
-    deactivateLoggging();
+    deactivateLogging();
 });
 
 test('default no logging', () => {
-    log('Foo');
+    logMessage('Foo');
     expect(logStore).toBe('');
 });
 
 test('logs after activation', () => {
     activateLogging();
-    log('Foo');
-    log('Bar');
+    logMessage('Foo');
+    logMessage('Bar');
 
     expect(logStore).toBe('ChurchTools Client:FooChurchTools Client:Bar');
 });
 
 test('logs after quite afer deactivation', () => {
     activateLogging();
-    log('Foo');
+    logMessage('Foo');
 
     expect(logStore).toBe('ChurchTools Client:Foo');
 
-    deactivateLoggging();
-    log('Bar');
+    deactivateLogging();
+    logMessage('Bar');
 
     expect(logStore).toBe('ChurchTools Client:Foo');
 });
