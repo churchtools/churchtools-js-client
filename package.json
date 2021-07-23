@@ -28,7 +28,8 @@
         "webpack-cli": "3.3.12"
     },
     "dependencies": {
-        "axios": "^0.19.2"
+        "axios": "^0.19.2",
+        "axios-logger": "^2.5.0"
     },
     "jest": {
         "testURL": "http://localhost/"

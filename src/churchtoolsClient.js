@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { log } from './logging';
+import { logRequest, logResponse, logError, logMessage } from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
@@ -25,15 +25,8 @@ class ChurchToolsClient {
         this.unauthenticatedCallbacks = [];
         this.rateLimitInterceptor = null;
 
-        this.ax.interceptors.request.use(request => {
-            log('Starting Request ', request);
-            return request;
-        });
-
-        this.ax.interceptors.response.use(response => {
-            log('Response: ', response);
-            return response;
-        });
+        this.ax.interceptors.request.use(logRequest, logError);
+        this.ax.interceptors.response.use(logResponse, logError);
 
         this.setUnauthorizedInterceptor(loginToken);
 
@@ -247,14 +240,14 @@ class ChurchToolsClient {
     }
 
     notifyUnauthenticated() {
-        log('Notifying unauthenticated.');
+        logMessage('Notifying unauthenticated.');
         this.unauthenticatedCallbacks.forEach(callback => {
             callback();
         });
     }
 
     retryWithLogin(config, loginToken, personId, resolve, reject, previousError) {
-        log('Trying transparent relogin with login token');
+        logMessage('Trying transparent relogin with login token');
         this.get('/whoami', {
             login_token: loginToken,
             user_id: personId,
@@ -262,7 +255,7 @@ class ChurchToolsClient {
             [CUSTOM_RETRY_PARAM]: true
         })
             .then(() => {
-                log('Successfully logged in again with login token');
+                logMessage('Successfully logged in again with login token');
                 if (this.csrfToken || !this.loadCSRFForOldApi) {
                     this.csrfToken = null;
                     return true;
@@ -293,7 +286,7 @@ class ChurchToolsClient {
                                 error.response.message &&
                                 error.response.data.message === 'Session expired!')
                         ) {
-                            log('Failed to login with login token', error);
+                            logMessage('Failed to login with login token', error);
                             reject(error);
                             this.notifyUnauthenticated();
                         } else {
@@ -318,7 +311,7 @@ class ChurchToolsClient {
                         this.notifyUnauthenticated();
                         reject(errorObject || response);
                     } else {
-                        log('Got 401 session expired');
+                        logMessage('Got 401 session expired');
                         if (loginToken) {
                             this.retryWithLogin(response.config, loginToken, personId, resolve, reject, response);
                         } else {
@@ -365,7 +358,7 @@ class ChurchToolsClient {
         const handleRateLimited = (response, errorObject) =>
             new Promise((resolve, reject) => {
                 if (response && response.status === STATUS_RATELIMITED) {
-                    log('rate limit reached, waiting ' + this.rateLimitTimeout + ' milliseconds.');
+                    logMessage('rate limit reached, waiting ' + this.rateLimitTimeout + ' milliseconds.');
                     this.delay(this.rateLimitTimeout)
                         .then(() => {
                             response.config.cancelToken = this.getCancelToken();
@@ -440,7 +433,7 @@ class ChurchToolsClient {
                 })
                 .catch(error => {
                     if (!error.status) {
-                        log('Network error: Offline', error);
+                        logMessage('Network error: Offline', error);
                         reject({
                             message:
                                 'Could not validate the url. Either the url is wrong or there is a problem with the ' +
@@ -448,7 +441,7 @@ class ChurchToolsClient {
                             messageKey: 'churchtools.url.offline'
                         });
                     } else {
-                        log('Error on checking url', error);
+                        logMessage('Error on checking url', error);
                         reject({
                             message: `The url ${url} does not point to a valid ChurchTools installation.`,
                             messageKey: 'churchtools.url.invalid',

@@ -3,19 +3,16 @@
 const BASEURL = 'https://demo.church.tools';
 const USERNAME = 'please-replace';
 const PASSWORD = 'please-replace';
-const LOGGING = false;
 // End of Settings
 
-const { churchtoolsClient, activateLogging } = require('@churchtools/churchtools-client');
+const { churchtoolsClient, activateLogging, LOG_LEVEL_INFO } = require('@churchtools/churchtools-client');
 const axiosCookieJarSupport = require('axios-cookiejar-support');
 const tough = require('tough-cookie');
 
 function initChurchToolsClient() {
     churchtoolsClient.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
     churchtoolsClient.setBaseUrl(BASEURL);
-    if (LOGGING) {
-        activateLogging();
-    }
+    activateLogging(LOG_LEVEL_INFO);
 }
 
 function handleError(error) {
@@ -37,9 +34,6 @@ initChurchToolsClient();
 login(USERNAME, PASSWORD).then(() => {
     console.log('Login successful.');
     return churchtoolsClient.get('/whoami').then(whoAmI => {
-        if (LOGGING) {
-            console.dir(whoAmI);
-        }
         console.log(`Hello ${whoAmI.firstName}!`);
     });
 }).catch(handleError);

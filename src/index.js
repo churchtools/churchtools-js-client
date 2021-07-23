@@ -1,5 +1,21 @@
 import * as churchtoolsClient from './churchtoolsClient';
-import { activateLogging } from './logging';
+import {
+    activateLogging,
+    deactivateLogging,
+    LOG_LEVEL_NONE,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_ERROR
+} from './logging';
 import * as urlHelper from './urlHelper';
 
-export { churchtoolsClient, activateLogging, urlHelper };
+export {
+    churchtoolsClient,
+    activateLogging,
+    deactivateLogging,
+    LOG_LEVEL_NONE,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_ERROR,
+    urlHelper
+};
