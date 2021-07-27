@@ -3,6 +3,7 @@
     "version": "1.0.3",
     "description": "Client library to interact with a ChurchTools Server.",
     "main": "dist/churchtools-client.js",
+    "types": "churchtools-client.d.ts",
     "scripts": {
         "test": "jest",
         "build": "webpack",
