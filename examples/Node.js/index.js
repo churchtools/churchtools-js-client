@@ -3,27 +3,20 @@
 const BASEURL = 'https://demo.church.tools';
 const USERNAME = 'please-replace';
 const PASSWORD = 'please-replace';
-const LOGGING = false;
 // End of Settings
 
-const { churchtoolsClient, activateLogging } = require('@churchtools/churchtools-client');
+const { churchtoolsClient, activateLogging, LOG_LEVEL_INFO, errorHelper } = require('@churchtools/churchtools-client');
 const axiosCookieJarSupport = require('axios-cookiejar-support');
 const tough = require('tough-cookie');
 
 function initChurchToolsClient() {
     churchtoolsClient.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
     churchtoolsClient.setBaseUrl(BASEURL);
-    if (LOGGING) {
-        activateLogging();
-    }
-}
-
-function handleError(error) {
-    if (error.response && error.response.data) {
-        console.log(error.response.data.translatedMessage || error.response.data.message);
-    } else {
-        console.error(error);
-    }
+    // Logging can be activated to either LOG_LEVEL_NONE (no logging at all, default),
+    // LOG_LEVEL_DEBUG (outputs every request and response including request/response data)
+    // LOG_LEVEL_INFO (outputs every request and response, but only method and URL) or
+    // LOG_LEVEL_ERROR (outputs only errors).
+    activateLogging(LOG_LEVEL_INFO);
 }
 
 function login(username, password) {
@@ -37,9 +30,10 @@ initChurchToolsClient();
 login(USERNAME, PASSWORD).then(() => {
     console.log('Login successful.');
     return churchtoolsClient.get('/whoami').then(whoAmI => {
-        if (LOGGING) {
-            console.dir(whoAmI);
-        }
         console.log(`Hello ${whoAmI.firstName}!`);
     });
-}).catch(handleError);
+}).catch(error => {
+    // getTranslatedErrorMessage returns a human readable translated error message
+    // from either a full response object, response data or Exception or Error instances.
+    console.error(errorHelper.getTranslatedErrorMessage(error));
+});
