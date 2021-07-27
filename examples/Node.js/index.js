@@ -12,6 +12,10 @@ const tough = require('tough-cookie');
 function initChurchToolsClient() {
     churchtoolsClient.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
     churchtoolsClient.setBaseUrl(BASEURL);
+    // Logging can be activated to either LOG_LEVEL_NONE (no logging at all, default),
+    // LOG_LEVEL_DEBUG (outputs every request and response including request/response data)
+    // LOG_LEVEL_INFO (outputs every request and response, but only method and URL) or
+    // LOG_LEVEL_ERROR (outputs only errors).
     activateLogging(LOG_LEVEL_INFO);
 }
 
@@ -28,4 +32,8 @@ login(USERNAME, PASSWORD).then(() => {
     return churchtoolsClient.get('/whoami').then(whoAmI => {
         console.log(`Hello ${whoAmI.firstName}!`);
     });
-}).catch(error => console.error(errorHelper.getTranslatedErrorMessage(error)));
+}).catch(error => {
+    // getTranslatedErrorMessage returns a human readable translated error message
+    // from either a full response object, response data or Exception or Error instances.
+    console.error(errorHelper.getTranslatedErrorMessage(error));
+});
