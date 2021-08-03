@@ -1,4 +1,0 @@
-title: 'Fix an error when running POST requests in non-browser environments ("FormData is not defined").'
-type: fixed
-author: ''
-group: ''
