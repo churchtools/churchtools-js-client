@@ -332,7 +332,10 @@ class ChurchToolsClient {
                 // Additionally for some unknown reason, when using axios-cookiejar-support Axios also calls
                 // onFullfilled instead of onRejected in case of a 401. That's why we also check for
                 // STATUS_UNAUTHORIZED here and handle this case accordingly.
-                if (response.status === STATUS_UNAUTHORIZED || response.data.message === 'Session expired!') {
+                if (
+                    response.status === STATUS_UNAUTHORIZED ||
+                    (response.data && response.data.message === 'Session expired!')
+                ) {
                     response.status = STATUS_UNAUTHORIZED;
                     return handleUnauthorized(response);
                 } else {
