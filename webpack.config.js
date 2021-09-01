@@ -14,9 +14,15 @@ const webConfig = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: /(node_modules)/,
+                include: [
+                    path.resolve(__dirname, 'src'),
+                    path.resolve(__dirname, 'node_modules/axios-logger/*'),
+                ],
                 use: {
-                    loader: 'babel-loader'
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['env']
+                    }
                 }
             }
         ]
