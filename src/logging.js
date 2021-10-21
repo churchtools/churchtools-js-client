@@ -50,7 +50,7 @@ const logResponse = response => {
 
 const logError = error => {
     if (logLevel < LOG_LEVEL_ERROR) {
-        return error;
+        return Promise.reject(error);
     }
     return AxiosLogger.errorLogger(error, getAxiosLoggerConfig());
 };
