@@ -10,7 +10,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "axios-cookiejar-support": "^1.0.0",
-    "@churchtools/churchtools-client": "^1.1.1",
+    "@churchtools/churchtools-client": "^1.1.4",
     "tough-cookie": "^4.0.0"
   }
 }

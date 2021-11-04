@@ -290,7 +290,7 @@ class ChurchToolsClient {
                             reject(error);
                             this.notifyUnauthenticated();
                         } else {
-                            reject(previousError);
+                            reject(error);
                         }
                     });
             })
