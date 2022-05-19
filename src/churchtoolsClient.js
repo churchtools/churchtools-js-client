@@ -25,6 +25,11 @@ class ChurchToolsClient {
         this.unauthenticatedCallbacks = [];
         this.rateLimitInterceptor = null;
 
+        this.firstRequestStarted = false;
+        this.firstRequestCompleted = false;
+        this.loginRunning = false;
+        this.deferredRequestCallbacks = [];
+
         this.ax.interceptors.request.use(logRequest, logError);
         this.ax.interceptors.response.use(logResponse, logError);
 
@@ -51,6 +56,33 @@ class ChurchToolsClient {
         return new Promise(function(resolve) {
             setTimeout(resolve.bind(null, v), t);
         });
+    }
+
+    /**
+     * Defer the execution of requests until the first request and any login requests have been completed.
+     *
+     * @param callback Function which calls the request
+     */
+    deferredExecution(callback) {
+        if ((this.firstRequestStarted && !this.firstRequestCompleted) || this.loginRunning) {
+            this.deferredRequestCallbacks.push(callback);
+        } else {
+            this.firstRequestStarted = true;
+            callback().catch(() => {
+                this.firstRequestCompleted = true;
+                this.processDeferredRequestCallbacks();
+            }).then(() => {
+                this.firstRequestCompleted = true;
+                this.processDeferredRequestCallbacks();
+            });
+        }
+    }
+
+    processDeferredRequestCallbacks() {
+        let callback;
+        while ((callback = this.deferredRequestCallbacks.pop()) !== undefined) {
+            callback();
+        }
     }
 
     enableCrossOriginRequests() {
@@ -85,7 +117,7 @@ class ChurchToolsClient {
     oldApi(module, func, params = {}) {
         this.loadCSRFForOldApi = true;
         return new Promise((resolve, reject) => {
-            Promise.resolve(true)
+            this.deferredExecution(() => Promise.resolve(true)
                 .then(() => {
                     if (this.csrfToken) {
                         return true;
@@ -116,7 +148,8 @@ class ChurchToolsClient {
                 })
                 .catch(error => {
                     reject(error);
-                });
+                })
+            );
         });
     }
 
@@ -133,7 +166,7 @@ class ChurchToolsClient {
 
     get(uri, params = {}, rawResponse = false) {
         return new Promise((resolve, reject) => {
-            this.ax
+            this.deferredExecution(() => this.ax
                 .get(this.buildUrl(uri), { params: params, cancelToken: this.getCancelToken() })
                 .then(response => {
                     if (rawResponse) {
@@ -144,7 +177,8 @@ class ChurchToolsClient {
                 })
                 .catch(error => {
                     reject(error);
-                });
+                })
+            );
         });
     }
 
@@ -172,14 +206,15 @@ class ChurchToolsClient {
 
     put(uri, data) {
         return new Promise((resolve, reject) => {
-            this.ax
+            this.deferredExecution(() => this.ax
                 .put(this.buildUrl(uri), data, { cancelToken: this.getCancelToken() })
                 .then(response => {
                     resolve(this.responseToData(response), response);
                 })
                 .catch(error => {
                     reject(error);
-                });
+                })
+            );
         });
     }
 
@@ -187,7 +222,7 @@ class ChurchToolsClient {
         // FormData will be sent as multipart/form-data and the CT server requires a CSRF token for such a request
         const needsCsrfToken = data && data.constructor && data.constructor.name === 'FormData';
         return new Promise((resolve, reject) => {
-            Promise.resolve()
+            this.deferredExecution(() => Promise.resolve()
                 .then(() => {
                     if (!needsCsrfToken || this.csrfToken) {
                         return Promise.resolve();
@@ -210,33 +245,36 @@ class ChurchToolsClient {
                 })
                 .catch(error => {
                     reject(error);
-                });
+                })
+            );
         });
     }
 
     patch(uri, data = {}) {
         return new Promise((resolve, reject) => {
-            this.ax
+            this.deferredExecution(() => this.ax
                 .patch(this.buildUrl(uri), data, { cancelToken: this.getCancelToken() })
                 .then(response => {
                     resolve(this.responseToData(response), response);
                 })
                 .catch(error => {
                     reject(error);
-                });
+                })
+            );
         });
     }
 
     deleteApi(uri, data = {}) {
         return new Promise((resolve, reject) => {
-            this.ax
+            this.deferredExecution(() => this.ax
                 .delete(this.buildUrl(uri), { data: data, cancelToken: this.getCancelToken() })
                 .then(response => {
                     resolve(this.responseToData(response), response);
                 })
                 .catch(error => {
                     reject(error);
-                });
+                })
+            );
         });
     }
 
@@ -249,6 +287,7 @@ class ChurchToolsClient {
 
     loginWithToken(loginToken, personId) {
         if (!this.currentLoginPromise) {
+            this.loginRunning = true;
             this.currentLoginPromise = this.get('/whoami', {
                 login_token: loginToken,
                 user_id: personId,
@@ -267,11 +306,13 @@ class ChurchToolsClient {
                     });
                 })
                 .then(res => {
+                    this.loginRunning = false;
                     this.currentLoginPromise = undefined;
                     return res;
                 })
                 .catch(e => {
                     logError(e);
+                    this.loginRunning = false;
                     this.currentLoginPromise = undefined;
                 });
         }
