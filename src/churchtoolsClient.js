@@ -265,10 +265,12 @@ class ChurchToolsClient {
                         this.csrfToken = response;
                         return true;
                     });
-                }).then(res => {
+                })
+                .then(res => {
                     this.currentLoginPromise = undefined;
                     return res;
-                }).catch(e => {
+                })
+                .catch(e => {
                     logError(e);
                     this.currentLoginPromise = undefined;
                 });
