@@ -31,6 +31,7 @@ class ChurchToolsClient {
         this.setUnauthorizedInterceptor(loginToken);
 
         this.rateLimitTimeout = 30000;
+        this.currentLoginPromise = undefined;
     }
 
     /**
@@ -246,25 +247,38 @@ class ChurchToolsClient {
         });
     }
 
+    loginWithToken(loginToken, personId) {
+        if (!this.currentLoginPromise) {
+            this.currentLoginPromise = this.get('/whoami', {
+                login_token: loginToken,
+                user_id: personId,
+                no_url_rewrite: true,
+                [CUSTOM_RETRY_PARAM]: true
+            })
+                .then(() => {
+                    logMessage('Successfully logged in again with login token');
+                    if (this.csrfToken || !this.loadCSRFForOldApi) {
+                        this.csrfToken = null;
+                        return true;
+                    }
+                    return this.get('/csrftoken').then(response => {
+                        this.csrfToken = response;
+                        return true;
+                    });
+                }).then(res => {
+                    this.currentLoginPromise = undefined;
+                    return res;
+                }).catch(e => {
+                    logError(e);
+                    this.currentLoginPromise = undefined;
+                });
+        }
+        return this.currentLoginPromise;
+    }
+
     retryWithLogin(config, loginToken, personId, resolve, reject, previousError) {
         logMessage('Trying transparent relogin with login token');
-        this.get('/whoami', {
-            login_token: loginToken,
-            user_id: personId,
-            no_url_rewrite: true,
-            [CUSTOM_RETRY_PARAM]: true
-        })
-            .then(() => {
-                logMessage('Successfully logged in again with login token');
-                if (this.csrfToken || !this.loadCSRFForOldApi) {
-                    this.csrfToken = null;
-                    return true;
-                }
-                return this.get('/csrftoken').then(response => {
-                    this.csrfToken = response;
-                    return true;
-                });
-            })
+        this.loginWithToken(loginToken, personId)
             .then(() => {
                 if (config.headers) {
                     config.headers['CSRF-Token'] = this.csrfToken;
@@ -385,6 +399,7 @@ class ChurchToolsClient {
                 // However, for some unknown reason, when using axios-cookiejar-support Axios also calls
                 // onFullfilled instead of onRejected in case of a 429. That's why we also check for
                 // STATUS_RATELIMITED here and handle this case accordingly.
+
                 if (response.status === STATUS_RATELIMITED) {
                     return handleRateLimited(response);
                 } else {
@@ -456,6 +471,7 @@ class ChurchToolsClient {
                 });
         });
     }
+
     setCookieJar(axiosCookieJarSupport, jar) {
         this.ax = axiosCookieJarSupport(this.ax);
         this.ax.defaults.jar = jar;
