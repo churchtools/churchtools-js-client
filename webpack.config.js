@@ -13,21 +13,55 @@ const webConfig = {
     module: {
         rules: [
             {
-                test: /\.js$/,
-                include: [
-                    path.resolve(__dirname, 'src'),
-                    path.resolve(__dirname, 'node_modules/axios-logger/*'),
-                ],
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['env']
+                        presets: [
+                            ['@babel/preset-env', {
+                                'targets': {
+                                    'ie': '11'
+                                }
+                            }]
+                        ]
                     }
                 }
             }
         ]
     },
-    devtool: 'source-map'
+    devtool: 'source-map',
+    target: ['web', 'es5']
 };
 
-module.exports = [webConfig];
+const nodeConfig = {
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'churchtools-client.node.js',
+        library: 'churchtoolsClient',
+        libraryTarget: 'umd',
+        globalObject: 'this'
+    },
+    mode: 'production',
+    module: {
+        rules: [
+            {
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [
+                            ['@babel/preset-env', {
+                                'targets': {
+                                    'ie': '11'
+                                }
+                            }]
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    devtool: 'source-map',
+    target: ['node', 'es5']
+};
+
+module.exports = [webConfig, nodeConfig];
