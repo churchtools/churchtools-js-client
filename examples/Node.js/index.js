@@ -10,7 +10,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support');
 const tough = require('tough-cookie');
 
 function initChurchToolsClient() {
-    churchtoolsClient.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
+    churchtoolsClient.setCookieJar(axiosCookieJarSupport.wrapper, new tough.CookieJar());
     churchtoolsClient.setBaseUrl(BASEURL);
     // Logging can be activated to either LOG_LEVEL_NONE (no logging at all, default),
     // LOG_LEVEL_DEBUG (outputs every request and response including request/response data)
