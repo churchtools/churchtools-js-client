@@ -74,7 +74,7 @@ const { churchtoolsClient, activateLogging } = require('@churchtools/churchtools
 const axiosCookieJarSupport = require('axios-cookiejar-support');
 const tough = require('tough-cookie');
 
-churchtoolsClient.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
+churchtoolsClient.setCookieJar(axiosCookieJarSupport.wrapper, new tough.CookieJar());
 churchtoolsClient.setBaseUrl('https://demo.church.tools');
 
 activateLogging();
