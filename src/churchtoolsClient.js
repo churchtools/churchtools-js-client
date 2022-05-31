@@ -167,22 +167,27 @@ class ChurchToolsClient {
         return `${this.churchToolsBaseUrl}/api${uri}`;
     }
 
-    get(uri, params = {}, rawResponse = false) {
+    get(uri, params = {}, rawResponse = false, callDeferred = true) {
+        const cb = (resolve, reject) =>
+            this.ax
+                .get(this.buildUrl(uri), { params: params, cancelToken: this.getCancelToken() })
+                .then(response => {
+                    if (rawResponse) {
+                        resolve(response);
+                    } else {
+                        resolve(this.responseToData(response), response);
+                    }
+                })
+                .catch(error => {
+                    reject(error);
+                });
+
         return new Promise((resolve, reject) => {
-            this.deferredExecution(() =>
-                this.ax
-                    .get(this.buildUrl(uri), { params: params, cancelToken: this.getCancelToken() })
-                    .then(response => {
-                        if (rawResponse) {
-                            resolve(response);
-                        } else {
-                            resolve(this.responseToData(response), response);
-                        }
-                    })
-                    .catch(error => {
-                        reject(error);
-                    })
-            );
+            if (callDeferred) {
+                this.deferredExecution(() => cb(resolve, reject));
+            } else {
+                cb(resolve, reject);
+            }
         });
     }
 
@@ -296,19 +301,24 @@ class ChurchToolsClient {
     loginWithToken(loginToken, personId) {
         if (!this.currentLoginPromise) {
             this.loginRunning = true;
-            this.currentLoginPromise = this.get('/whoami', {
-                login_token: loginToken,
-                user_id: personId,
-                no_url_rewrite: true,
-                [CUSTOM_RETRY_PARAM]: true
-            })
+            this.currentLoginPromise = this.get(
+                '/whoami',
+                {
+                    login_token: loginToken,
+                    user_id: personId,
+                    no_url_rewrite: true,
+                    [CUSTOM_RETRY_PARAM]: true
+                },
+                false,
+                false
+            )
                 .then(() => {
                     logMessage('Successfully logged in again with login token');
                     if (this.csrfToken || !this.loadCSRFForOldApi) {
                         this.csrfToken = null;
                         return true;
                     }
-                    return this.get('/csrftoken').then(response => {
+                    return this.get('/csrftoken', {}, false, false).then(response => {
                         this.csrfToken = response;
                         return true;
                     });
