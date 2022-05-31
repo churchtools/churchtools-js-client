@@ -182,7 +182,6 @@ class ChurchToolsClient {
                     reject(error);
                 });
 
-
         return new Promise((resolve, reject) => {
             if (callDeferred) {
                 this.deferredExecution(() => cb(resolve, reject));
@@ -302,12 +301,17 @@ class ChurchToolsClient {
     loginWithToken(loginToken, personId) {
         if (!this.currentLoginPromise) {
             this.loginRunning = true;
-            this.currentLoginPromise = this.get('/whoami', {
-                login_token: loginToken,
-                user_id: personId,
-                no_url_rewrite: true,
-                [CUSTOM_RETRY_PARAM]: true
-            }, false, false)
+            this.currentLoginPromise = this.get(
+                '/whoami',
+                {
+                    login_token: loginToken,
+                    user_id: personId,
+                    no_url_rewrite: true,
+                    [CUSTOM_RETRY_PARAM]: true
+                },
+                false,
+                false
+            )
                 .then(() => {
                     logMessage('Successfully logged in again with login token');
                     if (this.csrfToken || !this.loadCSRFForOldApi) {
