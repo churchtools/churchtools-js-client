@@ -329,9 +329,10 @@ class ChurchToolsClient {
                     return res;
                 })
                 .catch(e => {
-                    logError(e);
+                    logError(e).catch(() => {}); // catch is needed as logError can return a rejected promise
                     this.loginRunning = false;
                     this.currentLoginPromise = undefined;
+                    throw e;
                 });
         }
         return this.currentLoginPromise;
