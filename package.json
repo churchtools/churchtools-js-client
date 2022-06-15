@@ -36,7 +36,8 @@
         "axios-logger": "^2.5.0"
     },
     "jest": {
-        "testURL": "http://localhost/"
+        "testURL": "http://localhost/",
+        "testEnvironment": "node"
     },
     "directories": {
         "test": "test"
