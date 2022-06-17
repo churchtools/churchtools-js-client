@@ -350,6 +350,8 @@ class ChurchToolsClient {
                     };
                 }
                 config.cancelToken = this.getCancelToken();
+                config.httpAgent = undefined;
+                config.httpsAgent = undefined;
                 this.ax
                     .request(config)
                     .then(response => {
