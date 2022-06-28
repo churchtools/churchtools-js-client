@@ -70,6 +70,7 @@ const getAxiosLoggerConfig = (minLogLevelForData = LOG_LEVEL_DEBUG) => {
         prefixText: 'ChurchToolsClient',
         data: logLevel >= minLogLevelForData,
         params: logLevel >= minLogLevelForData,
+        headers: logLevel >= minLogLevelForData,
         logger: console.log
     };
 };
