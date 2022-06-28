@@ -52,7 +52,7 @@ const logError = error => {
     if (logLevel < LOG_LEVEL_ERROR) {
         return Promise.reject(error);
     }
-    return AxiosLogger.errorLogger(error, getAxiosLoggerConfig());
+    return AxiosLogger.errorLogger(error, getAxiosLoggerConfig(LOG_LEVEL_ERROR));
 };
 
 const logMessage = (message, message2) => {
@@ -65,10 +65,11 @@ const logMessage = (message, message2) => {
     }
 };
 
-const getAxiosLoggerConfig = () => {
+const getAxiosLoggerConfig = (minLogLevelForData = LOG_LEVEL_DEBUG) => {
     return {
         prefixText: 'ChurchToolsClient',
-        data: logLevel >= LOG_LEVEL_DEBUG,
+        data: logLevel >= minLogLevelForData,
+        params: logLevel >= minLogLevelForData,
         logger: console.log
     };
 };
