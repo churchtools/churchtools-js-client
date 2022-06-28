@@ -68,7 +68,8 @@ const logMessage = (message, message2) => {
 const getAxiosLoggerConfig = () => {
     return {
         prefixText: 'ChurchToolsClient',
-        data: logLevel >= LOG_LEVEL_DEBUG
+        data: logLevel >= LOG_LEVEL_DEBUG,
+        logger: console.log
     };
 };
 
