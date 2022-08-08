@@ -125,7 +125,7 @@ class ChurchToolsClient {
                         if (this.csrfToken) {
                             return true;
                         }
-                        return this.get('/csrftoken').then(response => {
+                        return this.get('/csrftoken', {}, false, false).then(response => {
                             this.csrfToken = response;
                             return true;
                         });
