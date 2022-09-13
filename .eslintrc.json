@@ -14,7 +14,8 @@
         "jest": true,
         "expect": true,
         "describe": true,
-        "require": true
+        "require": true,
+        "globalThis": true
     },
     "rules": {
         "indent": ["error", 4],
