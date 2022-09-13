@@ -230,7 +230,9 @@ class ChurchToolsClient {
 
     post(uri, data = {}) {
         // FormData will be sent as multipart/form-data and the CT server requires a CSRF token for such a request
-        const needsCsrfToken = data && data.constructor && data.constructor.name === 'FormData';
+        // React-Native mangles the constructor.name. Therefore another check must be applied to react-native
+        const needsCsrfToken =(!globalThis.FormData && data && data.constructor && data.constructor.name === 'FormData') // Node-JS
+            || (globalThis.FormData && data instanceof FormData); // browser/react-native
         return new Promise((resolve, reject) => {
             this.deferredExecution(() =>
                 Promise.resolve()
