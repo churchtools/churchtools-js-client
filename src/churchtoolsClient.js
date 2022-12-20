@@ -35,6 +35,7 @@ class ChurchToolsClient {
 
         this.setUnauthorizedInterceptor(loginToken);
 
+        this.timeout = DEFAULT_TIMEOUT;
         this.rateLimitTimeout = 30000;
         this.currentLoginPromise = undefined;
     }
@@ -50,6 +51,10 @@ class ChurchToolsClient {
 
     setRateLimitTimeout(timeoutInMs) {
         this.rateLimitTimeout = timeoutInMs;
+    }
+
+    setTimeout(timeoutInMs) {
+        this.timeout = timeoutInMs;
     }
 
     delay(t, v) {
@@ -103,7 +108,7 @@ class ChurchToolsClient {
         let source = axios.CancelToken.source();
         setTimeout(() => {
             source.cancel('Timeout');
-        }, DEFAULT_TIMEOUT);
+        }, this.timeout);
         return source.token;
     }
 
