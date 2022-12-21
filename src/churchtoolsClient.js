@@ -196,8 +196,8 @@ class ChurchToolsClient {
         });
     }
 
-    getAllPages(uri, params = {}) {
-        params.limit = 100;
+    getAllPages(uri, params = {}, resultsPerPage = 100) {
+        params.limit = resultsPerPage;
 
         return new Promise((resolve, reject) => {
             this.getAllPagesInternal(uri, params, 1, resolve, reject);
@@ -560,8 +560,8 @@ const get = (uri, params = {}, rawResponse = false) => {
     return defaultChurchToolsClient.get(uri, params, rawResponse);
 };
 
-const getAllPages = (uri, params = {}) => {
-    return defaultChurchToolsClient.getAllPages(uri, params);
+const getAllPages = (uri, params = {}, resultsPerPage = 100) => {
+    return defaultChurchToolsClient.getAllPages(uri, params, resultsPerPage);
 };
 
 const put = (uri, data) => {

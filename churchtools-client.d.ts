@@ -136,8 +136,9 @@ declare namespace churchtoolsClient{
          * Returns all data from a paginated API by calling multiple requests and concatenating the result.
          * @param uri Either the full URL or the part after "/api".
          * @param params Optional request parameters.
+         * @param resultsPerPage Optional param defining how many results should be fetched per page. default = 100
          */
-        getAllPages(uri: string, params?: object): Promise<any[]>;
+        getAllPages(uri: string, params?: object, resultsPerPage?: number): Promise<any[]>;
 
         /**
          * Sends a PUT request to the ChurchTools API.
@@ -260,8 +261,9 @@ declare namespace churchtoolsClient{
      * Returns all data from a paginated API by calling multiple requests and concatenating the result.
      * @param uri Either the full URL or the part after "/api".
      * @param params Optional request parameters.
+     * @param resultsPerPage Optional param defining how many results should be fetched per page. default = 100
      */
-    export function getAllPages(uri: string, params?: object): Promise<any[]>;
+    export function getAllPages(uri: string, params?: object, resultsPerPage?: number): Promise<any[]>;
 
     /**
      * Sends a PUT request to the ChurchTools API.
