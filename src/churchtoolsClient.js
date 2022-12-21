@@ -616,6 +616,10 @@ const setRateLimitInterceptor = (timeoutInMs = null) => {
     return defaultChurchToolsClient.setRateLimitInterceptor(timeoutInMs);
 };
 
+const setTimeout = timeoutInMs => {
+    return defaultChurchToolsClient.setTimeout(timeoutInMs);
+};
+
 export {
     ChurchToolsClient,
     oldApi,
@@ -633,5 +637,6 @@ export {
     setCookieJar,
     setLoadCSRFForOldAPI,
     setRateLimitTimeout,
-    setRateLimitInterceptor
+    setRateLimitInterceptor,
+    setTimeout
 };
