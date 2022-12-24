@@ -639,5 +639,5 @@ export {
     setLoadCSRFForOldAPI,
     setRateLimitTimeout,
     setRateLimitInterceptor,
-    setRequestTimeout as setTimeout
+    setRequestTimeout
 };
