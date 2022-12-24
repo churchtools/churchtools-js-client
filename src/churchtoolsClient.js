@@ -5,6 +5,7 @@ import { toCorrectChurchToolsUrl } from './urlHelper';
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
 const DEFAULT_TIMEOUT = 15000;
+const RATE_LIMIT_TIMEOUT = 30000;
 const STATUS_UNAUTHORIZED = 401;
 const STATUS_RATELIMITED = 429;
 const CUSTOM_RETRY_PARAM = 'X-retry-login';
@@ -35,8 +36,8 @@ class ChurchToolsClient {
 
         this.setUnauthorizedInterceptor(loginToken);
 
-        this.timeout = DEFAULT_TIMEOUT;
-        this.rateLimitTimeout = 30000;
+        this.requestTimeout = DEFAULT_TIMEOUT;
+        this.rateLimitTimeout = RATE_LIMIT_TIMEOUT;
         this.currentLoginPromise = undefined;
     }
 
@@ -53,8 +54,8 @@ class ChurchToolsClient {
         this.rateLimitTimeout = timeoutInMs;
     }
 
-    setTimeout(timeoutInMs) {
-        this.timeout = timeoutInMs;
+    setRequestTimeout(timeoutInMs) {
+        this.requestTimeout = timeoutInMs;
     }
 
     delay(t, v) {
@@ -108,7 +109,7 @@ class ChurchToolsClient {
         let source = axios.CancelToken.source();
         setTimeout(() => {
             source.cancel('Timeout');
-        }, this.timeout);
+        }, this.requestTimeout);
         return source.token;
     }
 
@@ -616,8 +617,8 @@ const setRateLimitInterceptor = (timeoutInMs = null) => {
     return defaultChurchToolsClient.setRateLimitInterceptor(timeoutInMs);
 };
 
-const setTimeout = timeoutInMs => {
-    return defaultChurchToolsClient.setTimeout(timeoutInMs);
+const setRequestTimeout = timeoutInMs => {
+    return defaultChurchToolsClient.setRequestTimeout(timeoutInMs);
 };
 
 export {
@@ -638,5 +639,5 @@ export {
     setLoadCSRFForOldAPI,
     setRateLimitTimeout,
     setRateLimitInterceptor,
-    setTimeout
+    setRequestTimeout as setTimeout
 };
