@@ -101,7 +101,7 @@ declare namespace churchtoolsClient{
          * Sets the milliseconds to wait until a request is cancelled
          * @param timeoutInMs Delay in ms.
          */
-        setTimeout(timeoutInMs: number): void;
+        setRequestTimeout(timeoutInMs: number): void;
 
         /**
          * Enables that cross sites requests should be made with sending credentials.
@@ -226,7 +226,7 @@ declare namespace churchtoolsClient{
      * Sets the milliseconds to wait until a request is cancelled
      * @param timeoutInMs Delay in ms.
      */
-    export function setTimeout(timeoutInMs: number): void;
+    export function setRequestTimeout(timeoutInMs: number): void;
 
     /**
      * Enables that cross sites requests should be made with sending credentials.
