@@ -65,6 +65,14 @@ const logMessage = (message, message2) => {
     }
 };
 
+const logWarning = (message, message2) => {
+    if (message2) {
+        console.warn('ChurchTools Client:', message, message2); //eslint-disable-line no-console
+    } else {
+        console.warn('ChurchTools Client:', message); //eslint-disable-line no-console
+    }
+};
+
 const getAxiosLoggerConfig = (minLogLevelForData = LOG_LEVEL_DEBUG) => {
     return {
         prefixText: 'ChurchToolsClient',
@@ -80,6 +88,7 @@ export {
     logResponse,
     logError,
     logMessage,
+    logWarning,
     activateLogging,
     deactivateLogging,
     LOG_LEVEL_NONE,

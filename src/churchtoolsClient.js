@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { logRequest, logResponse, logError, logMessage } from './logging';
+import {logRequest, logResponse, logError, logMessage, logWarning} from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
@@ -348,7 +348,7 @@ class ChurchToolsClient {
     }
 
     retryWithLogin(config, loginToken, personId, resolve, reject, previousError) {
-        logMessage('Trying transparent relogin with login token');
+        logWarning('Trying transparent relogin with login token');
         this.loginWithToken(loginToken, personId)
             .then(() => {
                 if (config.headers) {
