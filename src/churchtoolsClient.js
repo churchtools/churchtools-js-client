@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {logRequest, logResponse, logError, logMessage, logWarning} from './logging';
+import { logRequest, logResponse, logError, logMessage, logWarning } from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
