@@ -1,8 +1,7 @@
 import * as AxiosLogger from 'axios-logger';
-import {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 enum LOG_LEVEL {
-
     /**
      * Does not log at all.
      */
@@ -23,7 +22,6 @@ enum LOG_LEVEL {
      */
     DEBUG = 1 << 2,
 }
-
 
 const LOG_LEVEL_NONE = LOG_LEVEL.NONE;
 
@@ -80,7 +78,7 @@ const getAxiosLoggerConfig = (minLogLevelForData = LOG_LEVEL.DEBUG) => {
         data: logLevel >= minLogLevelForData,
         params: logLevel >= minLogLevelForData,
         headers: logLevel >= minLogLevelForData,
-        logger: (...args: any[]) => console.log(...args)
+        logger: (...args: any[]) => console.log(...args),
     };
 };
 
@@ -95,5 +93,5 @@ export {
     LOG_LEVEL_NONE,
     LOG_LEVEL_DEBUG,
     LOG_LEVEL_INFO,
-    LOG_LEVEL_ERROR
+    LOG_LEVEL_ERROR,
 };

@@ -1,5 +1,4 @@
-
-type TranslationFunction= (key: string, args?: Record<string, string>) => string;
+type TranslationFunction = (key: string, args?: Record<string, string>) => string;
 
 const getTranslatedErrorMessage = (error: any, translationFunction?: TranslationFunction) => {
     return getFromResponse(error, translationFunction) || getFromResponseData(error, translationFunction) || error;
@@ -17,7 +16,11 @@ const getFromResponse = (error: any, translationFunction?: TranslationFunction, 
     return getFromResponseData(error.response, translationFunction, keyOnly);
 };
 
-const getFromResponseData = (response: any, translationFunction?: TranslationFunction, keyOnly = false): string|null => {
+const getFromResponseData = (
+    response: any,
+    translationFunction?: TranslationFunction,
+    keyOnly = false
+): string | null => {
     if (!response) {
         return null;
     }
@@ -59,7 +62,7 @@ const getFromNestedErrors = (errors: any[], translationFunction?: TranslationFun
     if (!errors || !errors.length) {
         return null;
     }
-    return errors.map(error => getTranslatedErrorMessage(error, translationFunction)).filter(message => !!message);
+    return errors.map((error) => getTranslatedErrorMessage(error, translationFunction)).filter((message) => !!message);
 };
 
 export { getTranslatedErrorMessage, getErrorMessageKey };

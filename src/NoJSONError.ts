@@ -1,3 +1,1 @@
-export class NoJSONError extends Error {
-
-}
+export class NoJSONError extends Error {}

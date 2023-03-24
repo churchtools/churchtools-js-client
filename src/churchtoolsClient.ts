@@ -1,7 +1,7 @@
-import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios';
-import {logRequest, logResponse, logError, logMessage, logWarning} from './logging';
-import {toCorrectChurchToolsUrl} from './urlHelper';
-import {NoJSONError} from "./NoJSONError";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { logRequest, logResponse, logError, logMessage, logWarning } from './logging';
+import { toCorrectChurchToolsUrl } from './urlHelper';
+import { NoJSONError } from './NoJSONError';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
@@ -13,22 +13,24 @@ const CUSTOM_RETRY_PARAM = 'X-retry-login';
 
 export type Params = Record<string, any>;
 
-export type RawResponse<Result> = {
-    data: Result
-} | {
-    data: { data: Result }
-}
+export type RawResponse<Result> =
+    | {
+          data: Result;
+      }
+    | {
+          data: { data: Result };
+      };
 
 export type PageResponse<Result> = {
     data: {
-        data: Result,
+        data: Result;
         meta: {
             pagination: {
-                lastPage: number
-            }
-        }
-    }
-}
+                lastPage: number;
+            };
+        };
+    };
+};
 
 type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
 
@@ -59,7 +61,7 @@ class ChurchToolsClient {
         this.loadCSRFForOldApi = loadCSRFForOldApi;
         this.ax = axios.create({
             baseURL: churchToolsBaseUrl,
-            withCredentials: true
+            withCredentials: true,
         });
 
         this.ax.interceptors.request.use(logRequest, logError);
@@ -129,11 +131,11 @@ class ChurchToolsClient {
     }
 
     buildOldRequestObject(func: string, params: Params) {
-        return Object.assign({}, params, {func: func});
+        return Object.assign({}, params, { func: func });
     }
 
     responseToData<Data>(response: RawResponse<Data>) {
-        if (response.data && typeof response.data === "object" && "data" in response.data) {
+        if (response.data && typeof response.data === 'object' && 'data' in response.data) {
             return response.data.data;
         } else {
             return response.data;
@@ -164,9 +166,10 @@ class ChurchToolsClient {
                 Promise.resolve()
                     .then(() => {
                         if (this.csrfToken) {
+                            return;
                         }
-                        return this.get('/csrftoken', {}, false, false).then(response => {
-                            if (typeof response === "string") {
+                        return this.get('/csrftoken', {}, false, false).then((response) => {
+                            if (typeof response === 'string') {
                                 this.csrfToken = response;
                             }
                         });
@@ -177,20 +180,20 @@ class ChurchToolsClient {
                             this.buildOldRequestObject(func, params),
                             {
                                 headers: {
-                                    'CSRF-Token': this.csrfToken ?? ""
+                                    'CSRF-Token': this.csrfToken ?? '',
                                 },
-                                cancelToken: this.getCancelToken()
+                                cancelToken: this.getCancelToken(),
                             }
                         );
                     })
-                    .then(response => {
+                    .then((response) => {
                         if (response.data.status === 'success') {
                             resolve(this.responseToData(response));
                         } else {
-                            reject({response: response});
+                            reject({ response: response });
                         }
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         reject(error);
                     })
             );
@@ -202,12 +205,14 @@ class ChurchToolsClient {
     }
 
     private checkResponse(response: AxiosResponse) {
-        if (this.enforceJSON && (!response.data || typeof response.data !== "object")) {
-            throw new NoJSONError("Request to '"+ response.config.url + "' returned no JSON. Return value is:\n "+response.data);
+        if (this.enforceJSON && (!response.data || typeof response.data !== 'object')) {
+            throw new NoJSONError(
+                "Request to '" + response.config.url + "' returned no JSON. Return value is:\n " + response.data
+            );
         }
     }
 
-    setEnforceJSON(enforceJSON: boolean){
+    setEnforceJSON(enforceJSON: boolean) {
         this.enforceJSON = enforceJSON;
     }
 
@@ -221,15 +226,15 @@ class ChurchToolsClient {
     get<ResponseType>(uri: string, params = {}, rawResponse = false, callDeferred = true) {
         const cb = (resolve: Resolver<ResponseType>, reject: Rejecter) =>
             this.ax
-                .get(this.buildUrl(uri), {params: params, cancelToken: this.getCancelToken()})
-                .then(response => {
+                .get(this.buildUrl(uri), { params: params, cancelToken: this.getCancelToken() })
+                .then((response) => {
                     if (rawResponse) {
                         resolve(response as ResponseType);
                     } else {
                         resolve(this.responseToData(response as RawResponse<ResponseType>));
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     reject(error);
                 });
 
@@ -250,10 +255,17 @@ class ChurchToolsClient {
         });
     }
 
-    getAllPagesInternal<ResponseType>(uri: string, params: Params, page: number, resolve: Resolver<ResponseType[]>, reject: Rejecter, result: ResponseType[] = []) {
+    getAllPagesInternal<ResponseType>(
+        uri: string,
+        params: Params,
+        page: number,
+        resolve: Resolver<ResponseType[]>,
+        reject: Rejecter,
+        result: ResponseType[] = []
+    ) {
         params.page = page;
         this.get<PageResponse<ResponseType[]>>(uri, params, true)
-            .then(response => {
+            .then((response) => {
                 result.push(...this.responseToData<ResponseType[]>(response));
                 if (response.data.meta.pagination.lastPage > page) {
                     this.getAllPagesInternal(uri, params, page + 1, resolve, reject, result);
@@ -268,11 +280,11 @@ class ChurchToolsClient {
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 this.ax
-                    .put(this.buildUrl(uri), data, {cancelToken: this.getCancelToken()})
-                    .then(response => {
+                    .put(this.buildUrl(uri), data, { cancelToken: this.getCancelToken() })
+                    .then((response) => {
                         resolve(this.responseToData(response));
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         reject(error);
                     })
             );
@@ -292,25 +304,25 @@ class ChurchToolsClient {
                         if (!needsCsrfToken || this.csrfToken) {
                             return Promise.resolve();
                         }
-                        return this.get('/csrftoken').then(response => {
-                            if (typeof response === "string") {
+                        return this.get('/csrftoken').then((response) => {
+                            if (typeof response === 'string') {
                                 this.csrfToken = response;
                             }
                         });
                     })
                     .then(() => {
-                        const config: AxiosRequestConfig<Params> = {cancelToken: this.getCancelToken()};
+                        const config: AxiosRequestConfig<Params> = { cancelToken: this.getCancelToken() };
                         if (needsCsrfToken) {
                             config.headers = {
-                                'CSRF-Token': this.csrfToken ?? ""
+                                'CSRF-Token': this.csrfToken ?? '',
                             };
                         }
                         return this.ax.post(this.buildUrl(uri), data, config);
                     })
-                    .then(response => {
+                    .then((response) => {
                         resolve(this.responseToData(response));
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         reject(error);
                     })
             );
@@ -321,11 +333,11 @@ class ChurchToolsClient {
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 this.ax
-                    .patch(this.buildUrl(uri), data, {cancelToken: this.getCancelToken()})
-                    .then(response => {
+                    .patch(this.buildUrl(uri), data, { cancelToken: this.getCancelToken() })
+                    .then((response) => {
                         resolve(this.responseToData(response));
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         reject(error);
                     })
             );
@@ -336,11 +348,11 @@ class ChurchToolsClient {
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 this.ax
-                    .delete(this.buildUrl(uri), {data: data, cancelToken: this.getCancelToken()})
-                    .then(response => {
+                    .delete(this.buildUrl(uri), { data: data, cancelToken: this.getCancelToken() })
+                    .then((response) => {
                         resolve(this.responseToData(response));
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         reject(error);
                     })
             );
@@ -349,7 +361,7 @@ class ChurchToolsClient {
 
     notifyUnauthenticated() {
         logMessage('Notifying unauthenticated.');
-        this.unauthenticatedCallbacks.forEach(callback => callback());
+        this.unauthenticatedCallbacks.forEach((callback) => callback());
     }
 
     loginWithToken(loginToken: string, personId?: number) {
@@ -361,7 +373,7 @@ class ChurchToolsClient {
                     login_token: loginToken,
                     user_id: personId,
                     no_url_rewrite: true,
-                    [CUSTOM_RETRY_PARAM]: true
+                    [CUSTOM_RETRY_PARAM]: true,
                 },
                 false,
                 false
@@ -372,21 +384,20 @@ class ChurchToolsClient {
                         this.csrfToken = undefined;
                         return true;
                     }
-                    return this.get('/csrftoken', {}, false, false).then(response => {
-                        if (typeof response === "string") {
+                    return this.get('/csrftoken', {}, false, false).then((response) => {
+                        if (typeof response === 'string') {
                             this.csrfToken = response;
                         }
                         return true;
                     });
                 })
-                .then(res => {
+                .then((res) => {
                     this.loginRunning = false;
                     this.currentLoginPromise = undefined;
                     return res;
                 })
-                .catch(e => {
-                    logError(e).catch(() => {
-                    }); // catch is needed as logError can return a rejected promise
+                .catch((e) => {
+                    logError(e).catch(() => {}); // catch is needed as logError can return a rejected promise
                     this.loginRunning = false;
                     this.currentLoginPromise = undefined;
                     throw e;
@@ -395,15 +406,22 @@ class ChurchToolsClient {
         return this.currentLoginPromise;
     }
 
-    retryWithLogin(config: AxiosRequestConfig, loginToken: string, personId: undefined | number, resolve: Resolver<any>, reject: Rejecter, previousError: any) {
+    retryWithLogin(
+        config: AxiosRequestConfig,
+        loginToken: string,
+        personId: undefined | number,
+        resolve: Resolver<any>,
+        reject: Rejecter,
+        previousError: any
+    ) {
         logWarning('Trying transparent relogin with login token');
         this.loginWithToken(loginToken, personId)
             .then(() => {
                 if (config.headers) {
-                    config.headers['CSRF-Token'] = this.csrfToken ?? "";
+                    config.headers['CSRF-Token'] = this.csrfToken ?? '';
                 } else {
                     config.headers = {
-                        'CSRF-Token': this.csrfToken ?? ""
+                        'CSRF-Token': this.csrfToken ?? '',
                     };
                 }
                 config.cancelToken = this.getCancelToken();
@@ -411,10 +429,10 @@ class ChurchToolsClient {
                 config.httpsAgent = undefined;
                 this.ax
                     .request(config)
-                    .then(response => {
+                    .then((response) => {
                         resolve(response);
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         if (
                             (error.response && error.response.status) === STATUS_UNAUTHORIZED ||
                             (error.response &&
@@ -459,7 +477,7 @@ class ChurchToolsClient {
             });
 
         this.unauthorizedInterceptorId = this.ax.interceptors.response.use(
-            response => {
+            (response) => {
                 // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
                 // So technically we should be here only in case of a successful request.
                 // However, the old ChurchTools API returns { message: 'Session expired' } and a 200 status code
@@ -477,7 +495,7 @@ class ChurchToolsClient {
                     return Promise.resolve(response);
                 }
             },
-            errorObject => handleUnauthorized(errorObject.response, errorObject)
+            (errorObject) => handleUnauthorized(errorObject.response, errorObject)
         );
     }
 
@@ -502,10 +520,10 @@ class ChurchToolsClient {
                             response.config.cancelToken = this.getCancelToken();
                             return this.ax.request(response.config);
                         })
-                        .then(response => {
+                        .then((response) => {
                             resolve(response);
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             reject(error);
                         });
                 } else {
@@ -514,7 +532,7 @@ class ChurchToolsClient {
             });
 
         this.rateLimitInterceptorId = this.ax.interceptors.response.use(
-            response => {
+            (response) => {
                 // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
                 // So technically we should be here only in case of a successful request.
                 // However, for some unknown reason, when using axios-cookiejar-support Axios also calls
@@ -527,17 +545,21 @@ class ChurchToolsClient {
                     return Promise.resolve(response);
                 }
             },
-            errorObject => handleRateLimited(errorObject.response, errorObject)
+            (errorObject) => handleRateLimited(errorObject.response, errorObject)
         );
     }
 
-    validChurchToolsUrl(url: string, compareBuild = MINIMAL_CHURCHTOOLS_BUILD_VERSION, minimalVersion = MINIMAL_CHURCHTOOLS_VERSION) {
+    validChurchToolsUrl(
+        url: string,
+        compareBuild = MINIMAL_CHURCHTOOLS_BUILD_VERSION,
+        minimalVersion = MINIMAL_CHURCHTOOLS_VERSION
+    ) {
         const infoApiPath = '/api/info';
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
             this.ax
-                .get(infoEndpoint, {cancelToken: this.getCancelToken()})
-                .then(response => {
+                .get(infoEndpoint, { cancelToken: this.getCancelToken() })
+                .then((response) => {
                     const build = parseInt(response.data.build);
                     if (build >= compareBuild) {
                         if (response.request.responseURL !== infoEndpoint && response.request.responseURL) {
@@ -553,27 +575,27 @@ class ChurchToolsClient {
                             messageKey: 'churchtools.url.invalidold',
                             args: {
                                 url: url,
-                                minimalChurchToolsVersion: minimalVersion
-                            }
+                                minimalChurchToolsVersion: minimalVersion,
+                            },
                         });
                     } else {
                         reject({
                             message: `The url ${url} does not point to a valid ChurchTools installation.`,
                             messageKey: 'churchtools.url.invalid',
                             args: {
-                                url: url
-                            }
+                                url: url,
+                            },
                         });
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (!error.status) {
                         logMessage('Network error: Offline', error);
                         reject({
                             message:
                                 'Could not validate the url. Either the url is wrong or there is a problem with the ' +
                                 'internet connection',
-                            messageKey: 'churchtools.url.offline'
+                            messageKey: 'churchtools.url.offline',
                         });
                     } else {
                         logMessage('Error on checking url', error);
@@ -581,8 +603,8 @@ class ChurchToolsClient {
                             message: `The url ${url} does not point to a valid ChurchTools installation.`,
                             messageKey: 'churchtools.url.invalid',
                             args: {
-                                url: url
-                            }
+                                url: url,
+                            },
                         });
                     }
                 });
@@ -596,6 +618,6 @@ class ChurchToolsClient {
     }
 }
 
-export {ChurchToolsClient}
+export { ChurchToolsClient };
 
 export const defaultChurchToolsClient = new ChurchToolsClient();
