@@ -1,8 +1,8 @@
-const removeProtocol = url => {
+const removeProtocol = (url: string) => {
     return url.replace(/(^\w+:|^)\/\//, '');
 };
 
-const toCorrectChurchToolsUrl = url => {
+const toCorrectChurchToolsUrl = (url: string) => {
     if (/^http:.*/.test(url)) {
         return url;
     }

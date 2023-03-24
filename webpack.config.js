@@ -1,10 +1,10 @@
 const path = require('path');
 
-const webConfig = {
-    entry: './src/index.js',
+const generateConfig = (extraTarget, outputFile) => ({
+    entry: './src/index.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'churchtools-client.js',
+        filename: outputFile,
         library: 'churchtoolsClient',
         libraryTarget: 'umd',
         globalObject: 'this'
@@ -13,6 +13,22 @@ const webConfig = {
     module: {
         rules: [
             {
+                test: /.ts$/,
+                use: [{
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [
+                            ['@babel/preset-env', {
+                                'targets': {
+                                    'ie': '11'
+                                }
+                            }]
+                        ]
+                    }
+                }, {loader: 'ts-loader'}]
+            },
+            {
+                test: /.js$/,
                 use: {
                     loader: 'babel-loader',
                     options: {
@@ -29,39 +45,10 @@ const webConfig = {
         ]
     },
     devtool: 'source-map',
-    target: ['web', 'es5']
-};
+    target: [extraTarget, 'es5'],
+    resolve: {
+        extensions: ['.ts', '.js']
+    }
+});
 
-const nodeConfig = {
-    entry: './src/index.js',
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'churchtools-client.node.js',
-        library: 'churchtoolsClient',
-        libraryTarget: 'umd',
-        globalObject: 'this'
-    },
-    mode: 'production',
-    module: {
-        rules: [
-            {
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: [
-                            ['@babel/preset-env', {
-                                'targets': {
-                                    'ie': '11'
-                                }
-                            }]
-                        ]
-                    }
-                }
-            }
-        ]
-    },
-    devtool: 'source-map',
-    target: ['node', 'es5']
-};
-
-module.exports = [webConfig, nodeConfig];
+module.exports = [generateConfig('web', 'churchtools-client.js'), generateConfig('node', 'churchtools-client.node.js')];

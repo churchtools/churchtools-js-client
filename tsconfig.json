@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "lib": [
+      "DOM",
+      "es2021",
+      "esnext"
+    ],
+    "moduleResolution": "node",
+    "strict": true,
+    "target": "esnext",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationDir": "./dist"
+  },
+  "include": [
+    "src/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

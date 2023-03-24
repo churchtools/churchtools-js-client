@@ -1,4 +1,4 @@
-import * as churchtoolsClient from './churchtoolsClient';
+import {defaultChurchToolsClient as churchtoolsClient} from './churchtoolsClient';
 import {
     activateLogging,
     deactivateLogging,
