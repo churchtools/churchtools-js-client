@@ -1,23 +1,18 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
     "lib": [
       "DOM",
       "es2021",
       "esnext"
     ],
-    "moduleResolution": "node",
     "strict": true,
-    "target": "esnext",
-    "sourceMap": true,
-    "declaration": true,
-    "declarationDir": "./dist"
+    "emitDeclarationOnly": true,
+//    "outFile": "dist/churchtools-client.d.ts",
+    "declarationDir": "dist",
+    "declaration": true
   },
   "include": [
-    "src/*"
+    "src/index.ts"
   ],
   "exclude": [
     "node_modules"

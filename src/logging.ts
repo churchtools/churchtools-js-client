@@ -80,7 +80,7 @@ const getAxiosLoggerConfig = (minLogLevelForData = LOG_LEVEL.DEBUG) => {
         data: logLevel >= minLogLevelForData,
         params: logLevel >= minLogLevelForData,
         headers: logLevel >= minLogLevelForData,
-        logger: console.log
+        logger: (...args: any[]) => console.log(...args)
     };
 };
 

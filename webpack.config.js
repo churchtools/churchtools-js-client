@@ -25,22 +25,7 @@ const generateConfig = (extraTarget, outputFile) => ({
                             }]
                         ]
                     }
-                }, {loader: 'ts-loader'}]
-            },
-            {
-                test: /.js$/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: [
-                            ['@babel/preset-env', {
-                                'targets': {
-                                    'ie': '11'
-                                }
-                            }]
-                        ]
-                    }
-                }
+                }]
             }
         ]
     },
