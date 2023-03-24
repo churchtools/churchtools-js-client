@@ -1,6 +1,7 @@
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios';
 import {logRequest, logResponse, logError, logMessage, logWarning} from './logging';
 import {toCorrectChurchToolsUrl} from './urlHelper';
+import {NoJSONError} from "./NoJSONError";
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
@@ -15,7 +16,7 @@ export type Params = Record<string, any>;
 export type RawResponse<Result> = {
     data: Result
 } | {
-    data: {data: Result}
+    data: { data: Result }
 }
 
 export type PageResponse<Result> = {
@@ -49,8 +50,9 @@ class ChurchToolsClient {
     private rateLimitTimeout = RATE_LIMIT_TIMEOUT;
     private currentLoginPromise?: Promise<any>;
 
-    public ChurchToolsClient = ChurchToolsClient;
+    private enforceJSON = true;
 
+    public ChurchToolsClient = ChurchToolsClient;
 
     constructor(churchToolsBaseUrl?: string, loginToken?: string, loadCSRFForOldApi = false) {
         this.churchToolsBaseUrl = churchToolsBaseUrl;
@@ -61,7 +63,11 @@ class ChurchToolsClient {
         });
 
         this.ax.interceptors.request.use(logRequest, logError);
-        this.ax.interceptors.response.use(logResponse, logError);
+        this.ax.interceptors.response.use((response) => {
+            logResponse(response);
+            this.checkResponse(response);
+            return response;
+        }, logError);
 
         this.setUnauthorizedInterceptor(loginToken);
     }
@@ -193,6 +199,16 @@ class ChurchToolsClient {
 
     setLoadCSRFForOldAPI() {
         this.loadCSRFForOldApi = true;
+    }
+
+    private checkResponse(response: AxiosResponse) {
+        if (this.enforceJSON && (!response.data || typeof response.data !== "object")) {
+            throw new NoJSONError("Request to '"+ response.config.url + "' returned no JSON. Return value is:\n "+response.data);
+        }
+    }
+
+    setEnforceJSON(enforceJSON: boolean){
+        this.enforceJSON = enforceJSON;
     }
 
     buildUrl(uri: string) {
@@ -379,7 +395,7 @@ class ChurchToolsClient {
         return this.currentLoginPromise;
     }
 
-    retryWithLogin(config: AxiosRequestConfig, loginToken: string, personId: undefined|number, resolve: Resolver<any>, reject: Rejecter, previousError: any) {
+    retryWithLogin(config: AxiosRequestConfig, loginToken: string, personId: undefined | number, resolve: Resolver<any>, reject: Rejecter, previousError: any) {
         logWarning('Trying transparent relogin with login token');
         this.loginWithToken(loginToken, personId)
             .then(() => {

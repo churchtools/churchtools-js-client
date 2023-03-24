@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
+    "target": "esnext",
     "lib": [
       "DOM",
       "es2021",
       "esnext"
     ],
+    "moduleResolution": "Node",
     "strict": true,
-    "emitDeclarationOnly": true,
-//    "outFile": "dist/churchtools-client.d.ts",
     "declarationDir": "dist",
-    "declaration": true
+    "declaration": true,
+    "sourceMap": true
   },
   "include": [
     "src/index.ts"

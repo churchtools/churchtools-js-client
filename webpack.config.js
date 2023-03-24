@@ -25,9 +25,13 @@ const generateConfig = (extraTarget, outputFile) => ({
                             }]
                         ]
                     }
-                }]
+                }, {loader: 'ts-loader'}]
             }
         ]
+    },
+    externals: {
+        'axios': 'commonjs axios',
+        'axios-logger': 'commonjs axios-logger'
     },
     devtool: 'source-map',
     target: [extraTarget, 'es5'],
