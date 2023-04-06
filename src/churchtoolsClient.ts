@@ -67,7 +67,12 @@ class ChurchToolsClient {
         this.ax.interceptors.request.use(logRequest, logError);
         this.ax.interceptors.response.use((response) => {
             logResponse(response);
-            this.checkResponse(response);
+
+            // If the response is 204 No Content, we don't need to check the response because it would produce an error
+            if(response.status !== 204) {
+                this.checkResponse(response);
+            }
+
             return response;
         }, logError);
 
