@@ -69,7 +69,7 @@ class ChurchToolsClient {
             logResponse(response);
 
             // If the response is 204 No Content, we don't need to check the response because it would produce an error
-            if(response.status !== 204) {
+            if (response.status !== 204) {
                 this.checkResponse(response);
             }
 
