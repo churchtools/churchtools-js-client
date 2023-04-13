@@ -29,10 +29,10 @@ const generateConfig = (extraTarget, outputFile) => ({
             }
         ]
     },
-    externals: {
+    externals: extraTarget === 'node' ? {
         'axios': 'commonjs axios',
         'axios-logger': 'commonjs axios-logger'
-    },
+    } : {},
     devtool: 'source-map',
     target: [extraTarget, 'es5'],
     resolve: {
