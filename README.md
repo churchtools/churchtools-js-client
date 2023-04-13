@@ -48,7 +48,7 @@ The import of the package slightly differs in a web application from a Node.js a
 ### Web Application
 
 ```html
-<script src="node_modules/@churchtools/churchtools-client/dist/churchtools-client.js"></script>
+<script src="node_modules/@churchtools/churchtools-client/dist/churchtools-client.bundled.js"></script>
 <script>
     const { churchtoolsClient, activateLogging } = window.churchtoolsClient;
 

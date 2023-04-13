@@ -1,6 +1,6 @@
 const path = require('path');
 
-const generateConfig = (extraTarget, outputFile) => ({
+const generateConfig = (extraTarget, outputFile, includeLibraries) => ({
     entry: './src/index.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -29,7 +29,7 @@ const generateConfig = (extraTarget, outputFile) => ({
             }
         ]
     },
-    externals: extraTarget === 'node' ? {
+    externals: !includeLibraries ? {
         'axios': 'commonjs axios',
         'axios-logger': 'commonjs axios-logger'
     } : {},
@@ -40,4 +40,4 @@ const generateConfig = (extraTarget, outputFile) => ({
     }
 });
 
-module.exports = [generateConfig('web', 'churchtools-client.js'), generateConfig('node', 'churchtools-client.node.js')];
+module.exports = [generateConfig('web', 'churchtools-client.js', false), generateConfig('web', 'churchtools-client.bundled.js', true), generateConfig('node', 'churchtools-client.node.js', false)];
