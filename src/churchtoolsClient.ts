@@ -1,7 +1,7 @@
-import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios';
-import {logRequest, logResponse, logError, logMessage, logWarning} from './logging';
-import {toCorrectChurchToolsUrl} from './urlHelper';
-import {NoJSONError} from './NoJSONError';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { logRequest, logResponse, logError, logMessage, logWarning } from './logging';
+import { toCorrectChurchToolsUrl } from './urlHelper';
+import { NoJSONError } from './NoJSONError';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
@@ -16,11 +16,11 @@ export type Params = Record<string, any>;
 
 export type RawResponse<Result> =
     | {
-    data: Result;
-}
+          data: Result;
+      }
     | {
-    data: { data: Result };
-};
+          data: { data: Result };
+      };
 
 export type PageResponse<Result> = {
     data: {
@@ -35,7 +35,7 @@ export type PageResponse<Result> = {
 
 type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
 
-type GetOptions = { rawResponse?: boolean, callDeferred?: boolean, enforceJSON?: boolean };
+type GetOptions = { rawResponse?: boolean; callDeferred?: boolean; enforceJSON?: boolean };
 type PutOptions = { enforceJSON?: boolean };
 type PostOptions = { enforceJSON?: boolean };
 type DeleteOptions = { enforceJSON?: boolean };
@@ -138,7 +138,7 @@ class ChurchToolsClient {
     }
 
     buildOldRequestObject(func: string, params: Params) {
-        return Object.assign({}, params, {func: func});
+        return Object.assign({}, params, { func: func });
     }
 
     responseToData<Data>(response: RawResponse<Data>) {
@@ -197,7 +197,7 @@ class ChurchToolsClient {
                         if (response.data.status === 'success') {
                             resolve(this.responseToData(response));
                         } else {
-                            reject({response: response});
+                            reject({ response: response });
                         }
                     })
                     .catch((error) => {
@@ -212,8 +212,11 @@ class ChurchToolsClient {
     }
 
     private checkResponse(response: AxiosResponse) {
-        const enforceJSON = response.config?.data?.[ENFORCE_JSON_PARAM] ?? response.config?.params?.[ENFORCE_JSON_PARAM] ?? this.enforceJSON;
-        if (enforceJSON && response.status !== 204 && (response.data && typeof response.data !== 'object')) {
+        const enforceJSON =
+            response.config?.data?.[ENFORCE_JSON_PARAM] ??
+            response.config?.params?.[ENFORCE_JSON_PARAM] ??
+            this.enforceJSON;
+        if (enforceJSON && response.status !== 204 && response.data && typeof response.data !== 'object') {
             throw new NoJSONError(
                 "Request to '" + response.config.url + "' returned no JSON. Return value is:\n " + response.data
             );
@@ -231,18 +234,30 @@ class ChurchToolsClient {
         return `${this.churchToolsBaseUrl}/api${uri}`;
     }
 
-    get<ResponseType>(uri: string, params?: Params, rawResponse?: boolean, callDeferred?: boolean): Promise<ResponseType>
-    get<ResponseType>(uri: string, params: Params, options: GetOptions): Promise<ResponseType>
-    get<ResponseType>(uri: string, params = {}, rawResponseOrOptions: boolean | GetOptions = false, callDeferred = true) {
-        const rawResponse = typeof rawResponseOrOptions === "object" ? rawResponseOrOptions.rawResponse ?? false : rawResponseOrOptions
-        callDeferred = typeof rawResponseOrOptions === "object" ? rawResponseOrOptions.callDeferred ?? true : callDeferred;
-        const enforceJson = typeof rawResponseOrOptions === "object" ? rawResponseOrOptions.enforceJSON : undefined
+    get<ResponseType>(
+        uri: string,
+        params?: Params,
+        rawResponse?: boolean,
+        callDeferred?: boolean
+    ): Promise<ResponseType>;
+    get<ResponseType>(uri: string, params: Params, options: GetOptions): Promise<ResponseType>;
+    get<ResponseType>(
+        uri: string,
+        params = {},
+        rawResponseOrOptions: boolean | GetOptions = false,
+        callDeferred = true
+    ) {
+        const rawResponse =
+            typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.rawResponse ?? false : rawResponseOrOptions;
+        callDeferred =
+            typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.callDeferred ?? true : callDeferred;
+        const enforceJson = typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.enforceJSON : undefined;
 
         const cb = (resolve: Resolver<ResponseType>, reject: Rejecter) =>
             this.ax
                 .get(this.buildUrl(uri), {
-                    params: {...params, [ENFORCE_JSON_PARAM]: enforceJson},
-                    cancelToken: this.getCancelToken()
+                    params: { ...params, [ENFORCE_JSON_PARAM]: enforceJson },
+                    cancelToken: this.getCancelToken(),
                 })
                 .then((response) => {
                     if (rawResponse) {
@@ -297,10 +312,14 @@ class ChurchToolsClient {
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 this.ax
-                    .put(this.buildUrl(uri), {
-                        ...data,
-                        [ENFORCE_JSON_PARAM]: options?.enforceJSON
-                    }, {cancelToken: this.getCancelToken()})
+                    .put(
+                        this.buildUrl(uri),
+                        {
+                            ...data,
+                            [ENFORCE_JSON_PARAM]: options?.enforceJSON,
+                        },
+                        { cancelToken: this.getCancelToken() }
+                    )
                     .then((response) => {
                         resolve(this.responseToData(response));
                     })
@@ -331,16 +350,20 @@ class ChurchToolsClient {
                         });
                     })
                     .then(() => {
-                        const config: AxiosRequestConfig<Params> = {cancelToken: this.getCancelToken()};
+                        const config: AxiosRequestConfig<Params> = { cancelToken: this.getCancelToken() };
                         if (needsCsrfToken) {
                             config.headers = {
                                 'CSRF-Token': this.csrfToken ?? '',
                             };
                         }
-                        return this.ax.post(this.buildUrl(uri), {
-                            ...data,
-                            [ENFORCE_JSON_PARAM]: options.enforceJSON
-                        }, config);
+                        return this.ax.post(
+                            this.buildUrl(uri),
+                            {
+                                ...data,
+                                [ENFORCE_JSON_PARAM]: options.enforceJSON,
+                            },
+                            config
+                        );
                     })
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -356,10 +379,14 @@ class ChurchToolsClient {
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 this.ax
-                    .patch(this.buildUrl(uri), {
-                        ...data,
-                        [ENFORCE_JSON_PARAM]: options?.enforceJSON
-                    }, {cancelToken: this.getCancelToken()})
+                    .patch(
+                        this.buildUrl(uri),
+                        {
+                            ...data,
+                            [ENFORCE_JSON_PARAM]: options?.enforceJSON,
+                        },
+                        { cancelToken: this.getCancelToken() }
+                    )
                     .then((response) => {
                         resolve(this.responseToData(response));
                     })
@@ -375,8 +402,8 @@ class ChurchToolsClient {
             this.deferredExecution(() =>
                 this.ax
                     .delete(this.buildUrl(uri), {
-                        data: {...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON},
-                        cancelToken: this.getCancelToken()
+                        data: { ...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON },
+                        cancelToken: this.getCancelToken(),
                     })
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -426,8 +453,7 @@ class ChurchToolsClient {
                     return res;
                 })
                 .catch((e) => {
-                    logError(e).catch(() => {
-                    }); // catch is needed as logError can return a rejected promise
+                    logError(e).catch(() => {}); // catch is needed as logError can return a rejected promise
                     this.loginRunning = false;
                     this.currentLoginPromise = undefined;
                     throw e;
@@ -588,7 +614,7 @@ class ChurchToolsClient {
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
             this.ax
-                .get(infoEndpoint, {cancelToken: this.getCancelToken()})
+                .get(infoEndpoint, { cancelToken: this.getCancelToken() })
                 .then((response) => {
                     const build = parseInt(response.data.build);
                     if (build >= compareBuild) {
@@ -648,6 +674,6 @@ class ChurchToolsClient {
     }
 }
 
-export {ChurchToolsClient};
+export { ChurchToolsClient };
 
 export const defaultChurchToolsClient = new ChurchToolsClient();
