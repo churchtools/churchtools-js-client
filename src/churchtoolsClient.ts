@@ -525,6 +525,7 @@ class ChurchToolsClient {
                             this.retryWithLogin(response.config, loginToken, personId, resolve, reject, response);
                         } else {
                             this.notifyUnauthenticated();
+                            reject(errorObject || response);
                         }
                     }
                 } else {
