@@ -358,10 +358,12 @@ class ChurchToolsClient {
                         }
                         return this.ax.post(
                             this.buildUrl(uri),
-                            needsCsrfToken ? data : {
-                                ...data,
-                                [ENFORCE_JSON_PARAM]: options.enforceJSON,
-                            },
+                            needsCsrfToken
+                                ? data
+                                : {
+                                      ...data,
+                                      [ENFORCE_JSON_PARAM]: options.enforceJSON,
+                                  },
                             config
                         );
                     })
