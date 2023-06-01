@@ -1,2 +1,7 @@
-.babelrc
-node_modules
+*
+!dist/*
+!CHANGELOG.md
+!LICENSE
+!README.md
+!package-lock.json
+!package.json
