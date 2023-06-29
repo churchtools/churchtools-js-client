@@ -119,8 +119,7 @@ Instead, an object-wrapped approach can be used to manage and call multiple inst
 application:
 
 ```js
-const { churchtoolsClient, activateLogging } = require('@churchtools/churchtools-client');
-const ChurchToolsClient = churchtoolsClient.ChurchToolsClient;
+const { ChurchtoolsClient, activateLogging } = require('@churchtools/churchtools-client');
 
 const clientA = new ChurchToolsClient();
 clientA.setBaseUrl('https://foobar.church.tools');
