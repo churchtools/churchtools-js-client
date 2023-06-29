@@ -37,7 +37,7 @@ type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
 
 type GetOptions = { rawResponse?: boolean; callDeferred?: boolean; enforceJSON?: boolean };
 type PutOptions = { enforceJSON?: boolean };
-type PostOptions = { enforceJSON?: boolean };
+type PostOptions = { enforceJSON?: boolean, abortController?: AbortController };
 type DeleteOptions = { enforceJSON?: boolean };
 type PatchOptions = { enforceJSON?: boolean };
 
@@ -149,12 +149,14 @@ class ChurchToolsClient {
         }
     }
 
-    getCancelToken() {
-        let source = axios.CancelToken.source();
+    getAbortSignal(abortController?: AbortController) {
+        if (!abortController) {
+            abortController = new AbortController();
+        }
         setTimeout(() => {
-            source.cancel('Timeout');
+            abortController!.abort();
         }, this.requestTimeout);
-        return source.token;
+        return abortController.signal;
     }
 
     /**
@@ -189,7 +191,7 @@ class ChurchToolsClient {
                                 headers: {
                                     'CSRF-Token': this.csrfToken ?? '',
                                 },
-                                cancelToken: this.getCancelToken(),
+                                signal: this.getAbortSignal()
                             }
                         );
                     })
@@ -257,7 +259,7 @@ class ChurchToolsClient {
             this.ax
                 .get(this.buildUrl(uri), {
                     params: { ...params, [ENFORCE_JSON_PARAM]: enforceJson },
-                    cancelToken: this.getCancelToken(),
+                    signal: this.getAbortSignal()
                 })
                 .then((response) => {
                     if (rawResponse) {
@@ -318,7 +320,7 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        { cancelToken: this.getCancelToken() }
+                        { signal: this.getAbortSignal() }
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -350,12 +352,14 @@ class ChurchToolsClient {
                         });
                     })
                     .then(() => {
-                        const config: AxiosRequestConfig<Params> = { cancelToken: this.getCancelToken() };
+                        const config: AxiosRequestConfig<Params> = {};
                         if (needsCsrfToken) {
                             config.headers = {
                                 'CSRF-Token': this.csrfToken ?? '',
                             };
                         }
+                        config.signal = this.getAbortSignal(options.abortController);
+
                         return this.ax.post(
                             this.buildUrl(uri),
                             needsCsrfToken
@@ -387,7 +391,7 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        { cancelToken: this.getCancelToken() }
+                        { signal: this.getAbortSignal() }
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -405,7 +409,7 @@ class ChurchToolsClient {
                 this.ax
                     .delete(this.buildUrl(uri), {
                         data: { ...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON },
-                        cancelToken: this.getCancelToken(),
+                        signal: this.getAbortSignal()
                     })
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -482,7 +486,7 @@ class ChurchToolsClient {
                         'CSRF-Token': this.csrfToken ?? '',
                     };
                 }
-                config.cancelToken = this.getCancelToken();
+                config.signal = this.getAbortSignal();
                 config.httpAgent = undefined;
                 config.httpsAgent = undefined;
                 this.ax
@@ -576,7 +580,7 @@ class ChurchToolsClient {
                     logMessage('rate limit reached, waiting ' + this.rateLimitTimeout + ' milliseconds.');
                     this.delay(this.rateLimitTimeout)
                         .then(() => {
-                            response.config.cancelToken = this.getCancelToken();
+                            response.config.signal = this.getAbortSignal();
                             return this.ax.request(response.config);
                         })
                         .then((response) => {
@@ -617,7 +621,7 @@ class ChurchToolsClient {
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
             this.ax
-                .get(infoEndpoint, { cancelToken: this.getCancelToken() })
+                .get(infoEndpoint, { signal: this.getAbortSignal() })
                 .then((response) => {
                     const build = parseInt(response.data.build);
                     if (build >= compareBuild) {

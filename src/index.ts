@@ -1,4 +1,4 @@
-import { defaultChurchToolsClient as churchtoolsClient } from './churchtoolsClient';
+import { defaultChurchToolsClient as churchtoolsClient, ChurchToolsClient } from './churchtoolsClient';
 import {
     activateLogging,
     deactivateLogging,
@@ -12,6 +12,7 @@ import * as errorHelper from './errorHelper';
 
 export {
     churchtoolsClient,
+    ChurchToolsClient,
     activateLogging,
     deactivateLogging,
     LOG_LEVEL_NONE,
