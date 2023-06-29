@@ -156,7 +156,7 @@ class ChurchToolsClient {
         setTimeout(() => {
             abortController!.abort();
         }, this.requestTimeout);
-        return abortController.signal;
+        return abortController!.signal;
     }
 
     /**
