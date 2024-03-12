@@ -16,11 +16,11 @@ export type Params = Record<string, any>;
 
 export type RawResponse<Result> =
     | {
-          data: Result;
-      }
+    data: Result;
+}
     | {
-          data: { data: Result };
-      };
+    data: { data: Result };
+};
 
 export type PageResponse<Result> = {
     data: {
@@ -35,11 +35,13 @@ export type PageResponse<Result> = {
 
 type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
 
-type GetOptions = { rawResponse?: boolean; callDeferred?: boolean; enforceJSON?: boolean };
-type PutOptions = { enforceJSON?: boolean };
-type PostOptions = { enforceJSON?: boolean, abortController?: AbortController };
-type DeleteOptions = { enforceJSON?: boolean };
-type PatchOptions = { enforceJSON?: boolean };
+type RequestOptions = {enforceJSON?: boolean, needsAuthentication?: boolean};
+
+type GetOptions = RequestOptions & { rawResponse?: boolean; callDeferred?: boolean; };
+type PutOptions = RequestOptions
+type PostOptions = RequestOptions & { abortController?: AbortController };
+type DeleteOptions = RequestOptions
+type PatchOptions = RequestOptions
 
 type Rejecter = (error: any) => void;
 
@@ -58,6 +60,9 @@ class ChurchToolsClient {
     private requestTimeout = DEFAULT_TIMEOUT;
     private rateLimitTimeout = RATE_LIMIT_TIMEOUT;
     private currentLoginPromise?: Promise<any>;
+
+    private needsAuthentication: boolean|undefined;
+    private hasToken = false;
 
     private enforceJSON = false;
 
@@ -78,7 +83,23 @@ class ChurchToolsClient {
             return response;
         }, logError);
 
+        // Set headers for authentication
+        this.ax.interceptors.request.use((config) => {
+            // The backend only checks if the header is set. So if the header is set to false, remove it
+            if (config.headers?.["X-OnlyAuthenticated"] === "0") {
+                delete config.headers["X-OnlyAuthenticated"];
+            } else if (!config.headers?.["X-OnlyAuthenticated"] && (this.needsAuthentication ?? this.hasToken)) {
+                config.headers = config.headers ?? {}
+                config.headers["X-OnlyAuthenticated"] = "1";
+            }
+            return config;
+        })
+
         this.setUnauthorizedInterceptor(loginToken);
+    }
+
+    setNeedsAuthentication(needsAuthentication: boolean) {
+        this.needsAuthentication = needsAuthentication;
     }
 
     /**
@@ -138,7 +159,7 @@ class ChurchToolsClient {
     }
 
     buildOldRequestObject(func: string, params: Params) {
-        return Object.assign({}, params, { func: func });
+        return Object.assign({}, params, {func: func});
     }
 
     responseToData<Data>(response: RawResponse<Data>) {
@@ -199,7 +220,7 @@ class ChurchToolsClient {
                         if (response.data.status === 'success') {
                             resolve(this.responseToData(response));
                         } else {
-                            reject({ response: response });
+                            reject({response: response});
                         }
                     })
                     .catch((error) => {
@@ -242,7 +263,7 @@ class ChurchToolsClient {
         rawResponse?: boolean,
         callDeferred?: boolean
     ): Promise<ResponseType>;
-    get<ResponseType>(uri: string, params: Params, options: GetOptions): Promise<ResponseType>;
+    get<ResponseType>(uri: string, params?: Params, options?: GetOptions): Promise<ResponseType>;
     get<ResponseType>(
         uri: string,
         params = {},
@@ -254,12 +275,19 @@ class ChurchToolsClient {
         callDeferred =
             typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.callDeferred ?? true : callDeferred;
         const enforceJson = typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.enforceJSON : undefined;
+        const needsAuthentication = typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.needsAuthentication : undefined;
+
+        const headers: Record<string, any> = {};
+        if (needsAuthentication !== undefined) {
+            headers["X-OnlyAuthenticated"] = needsAuthentication ? "1" : "0";
+        }
 
         const cb = (resolve: Resolver<ResponseType>, reject: Rejecter) =>
             this.ax
                 .get(this.buildUrl(uri), {
-                    params: { ...params, [ENFORCE_JSON_PARAM]: enforceJson },
-                    signal: this.getAbortSignal()
+                    params: {...params, [ENFORCE_JSON_PARAM]: enforceJson},
+                    signal: this.getAbortSignal(),
+                    headers
                 })
                 .then((response) => {
                     if (rawResponse) {
@@ -312,6 +340,13 @@ class ChurchToolsClient {
 
     put<ResponseType>(uri: string, data: Params, options: PutOptions = {}) {
         return new Promise<ResponseType>((resolve, reject) => {
+            const needsAuthentication = options.needsAuthentication;
+
+            const headers: Record<string, any> = {};
+            if (needsAuthentication !== undefined) {
+                headers["X-OnlyAuthenticated"] = needsAuthentication ? "1" : "0";
+            }
+
             this.deferredExecution(() =>
                 this.ax
                     .put(
@@ -320,7 +355,7 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        { signal: this.getAbortSignal() }
+                        {signal: this.getAbortSignal(), headers}
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -338,6 +373,13 @@ class ChurchToolsClient {
         const needsCsrfToken =
             (!globalThis.FormData && data && data.constructor && data.constructor.name === 'FormData') || // Node-JS
             (globalThis.FormData && data instanceof FormData); // browser/react-native
+        const needsAuthentication = options.needsAuthentication;
+
+        const headers: Record<string, any> = {};
+        if (needsAuthentication !== undefined) {
+            headers["X-OnlyAuthenticated"] = needsAuthentication ? "1" : "0";
+        }
+
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 Promise.resolve()
@@ -352,9 +394,12 @@ class ChurchToolsClient {
                         });
                     })
                     .then(() => {
-                        const config: AxiosRequestConfig<Params> = {};
+                        const config: AxiosRequestConfig<Params> = {
+                            headers
+                        };
                         if (needsCsrfToken) {
                             config.headers = {
+                                ...config.headers,
                                 'CSRF-Token': this.csrfToken ?? '',
                             };
                         }
@@ -365,9 +410,9 @@ class ChurchToolsClient {
                             needsCsrfToken
                                 ? data
                                 : {
-                                      ...data,
-                                      [ENFORCE_JSON_PARAM]: options.enforceJSON,
-                                  },
+                                    ...data,
+                                    [ENFORCE_JSON_PARAM]: options.enforceJSON,
+                                },
                             config
                         );
                     })
@@ -382,6 +427,13 @@ class ChurchToolsClient {
     }
 
     patch<ResponseType>(uri: string, data: Params = {}, options: PatchOptions = {}) {
+        const needsAuthentication = options.needsAuthentication;
+
+        const headers: Record<string, any> = {};
+        if (needsAuthentication !== undefined) {
+            headers["X-OnlyAuthenticated"] = needsAuthentication ? "1" : "0";
+        }
+
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 this.ax
@@ -391,7 +443,7 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        { signal: this.getAbortSignal() }
+                        {signal: this.getAbortSignal(), headers}
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -404,12 +456,20 @@ class ChurchToolsClient {
     }
 
     deleteApi<ResponseType>(uri: string, data: Params = {}, options: DeleteOptions = {}) {
+        const needsAuthentication = options.needsAuthentication;
+
+        const headers: Record<string, any> = {};
+        if (needsAuthentication !== undefined) {
+            headers["X-OnlyAuthenticated"] = needsAuthentication ? "1" : "0";
+        }
+
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
                 this.ax
                     .delete(this.buildUrl(uri), {
-                        data: { ...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON },
-                        signal: this.getAbortSignal()
+                        data: {...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON},
+                        signal: this.getAbortSignal(),
+                        headers,
                     })
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -459,7 +519,8 @@ class ChurchToolsClient {
                     return res;
                 })
                 .catch((e) => {
-                    logError(e).catch(() => {}); // catch is needed as logError can return a rejected promise
+                    logError(e).catch(() => {
+                    }); // catch is needed as logError can return a rejected promise
                     this.loginRunning = false;
                     this.currentLoginPromise = undefined;
                     throw e;
@@ -560,6 +621,7 @@ class ChurchToolsClient {
             },
             (errorObject) => handleUnauthorized(errorObject.response, errorObject)
         );
+        this.hasToken = !!loginToken;
     }
 
     onUnauthenticated(callback: () => void) {
@@ -621,7 +683,7 @@ class ChurchToolsClient {
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
             this.ax
-                .get(infoEndpoint, { signal: this.getAbortSignal() })
+                .get(infoEndpoint, {signal: this.getAbortSignal()})
                 .then((response) => {
                     const build = parseInt(response.data.build);
                     if (build >= compareBuild) {
