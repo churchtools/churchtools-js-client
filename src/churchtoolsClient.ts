@@ -500,7 +500,7 @@ class ChurchToolsClient {
                 },
                 {
                     rawResponse: false,
-                    callDeferred: false
+                    callDeferred: false,
                 }
             )
                 .then(() => {
@@ -685,9 +685,12 @@ class ChurchToolsClient {
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
             this.ax
-                .get(infoEndpoint, { signal: this.getAbortSignal(), headers: {
-                    "X-OnlyAuthenticated": "0"
-                    } })
+                .get(infoEndpoint, {
+                    signal: this.getAbortSignal(),
+                    headers: {
+                        'X-OnlyAuthenticated': '0',
+                    },
+                })
                 .then((response) => {
                     const build = parseInt(response.data.build);
                     if (build >= compareBuild) {
