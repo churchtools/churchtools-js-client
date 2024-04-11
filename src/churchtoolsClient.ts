@@ -498,8 +498,10 @@ class ChurchToolsClient {
                     no_url_rewrite: true,
                     [CUSTOM_RETRY_PARAM]: true,
                 },
-                false,
-                false
+                {
+                    rawResponse: false,
+                    callDeferred: false,
+                }
             )
                 .then(() => {
                     logMessage('Successfully logged in again with login token');
@@ -683,7 +685,12 @@ class ChurchToolsClient {
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
         return new Promise((resolve, reject) => {
             this.ax
-                .get(infoEndpoint, { signal: this.getAbortSignal() })
+                .get(infoEndpoint, {
+                    signal: this.getAbortSignal(),
+                    headers: {
+                        'X-OnlyAuthenticated': '0',
+                    },
+                })
                 .then((response) => {
                     const build = parseInt(response.data.build);
                     if (build >= compareBuild) {
