@@ -35,7 +35,7 @@ export type PageResponse<Result> = {
 
 type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
 
-type RequestOptions = { enforceJSON?: boolean; needsAuthentication?: boolean, timeout?: number };
+type RequestOptions = { enforceJSON?: boolean; needsAuthentication?: boolean; timeout?: number };
 
 type GetOptions = RequestOptions & { rawResponse?: boolean; callDeferred?: boolean };
 type PutOptions = RequestOptions;
