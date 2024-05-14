@@ -35,7 +35,7 @@ export type PageResponse<Result> = {
 
 type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
 
-type RequestOptions = { enforceJSON?: boolean; needsAuthentication?: boolean };
+type RequestOptions = { enforceJSON?: boolean; needsAuthentication?: boolean, timeout?: number };
 
 type GetOptions = RequestOptions & { rawResponse?: boolean; callDeferred?: boolean };
 type PutOptions = RequestOptions;
@@ -170,13 +170,13 @@ class ChurchToolsClient {
         }
     }
 
-    getAbortSignal(abortController?: AbortController) {
+    getAbortSignal(abortController?: AbortController, timeout?: number) {
         if (!abortController) {
             abortController = new AbortController();
         }
         setTimeout(() => {
             abortController!.abort();
-        }, this.requestTimeout);
+        }, timeout ?? this.requestTimeout);
         return abortController!.signal;
     }
 
@@ -356,7 +356,7 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        { signal: this.getAbortSignal(), headers }
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers }
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -404,7 +404,7 @@ class ChurchToolsClient {
                                 'CSRF-Token': this.csrfToken ?? '',
                             };
                         }
-                        config.signal = this.getAbortSignal(options.abortController);
+                        config.signal = this.getAbortSignal(options.abortController, options.timeout);
 
                         return this.ax.post(
                             this.buildUrl(uri),
@@ -442,9 +442,9 @@ class ChurchToolsClient {
                         this.buildUrl(uri),
                         {
                             ...data,
-                            [ENFORCE_JSON_PARAM]: options?.enforceJSON,
+                            [ENFORCE_JSON_PARAM]: options.enforceJSON,
                         },
-                        { signal: this.getAbortSignal(), headers }
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers }
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -469,7 +469,7 @@ class ChurchToolsClient {
                 this.ax
                     .delete(this.buildUrl(uri), {
                         data: { ...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON },
-                        signal: this.getAbortSignal(),
+                        signal: this.getAbortSignal(undefined, options?.timeout),
                         headers,
                     })
                     .then((response) => {
