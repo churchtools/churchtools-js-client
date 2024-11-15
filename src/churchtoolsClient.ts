@@ -369,7 +369,7 @@ class ChurchToolsClient {
     }
 
     post<ResponseType>(uri: string, data: Params = {}, options: PostOptions = {}) {
-        const isNodeJsFormData = (data && data.constructor && data.constructor.name === 'FormData');
+        const isNodeJsFormData = data && data.constructor && data.constructor.name === 'FormData';
         // FormData will be sent as multipart/form-data and the CT server requires a CSRF token for such a request
         // React-Native mangles the constructor.name. Therefore, another check must be applied to react-native
         const needsCsrfToken =
@@ -412,7 +412,7 @@ class ChurchToolsClient {
                                 ...config.headers,
                                 // @ts-ignore
                                 ...data.getHeaders(),
-                                'Content-Type': 'multipart/form-data'
+                                'Content-Type': 'multipart/form-data',
                             };
                         }
                         config.signal = this.getAbortSignal(options.abortController, options.timeout);
