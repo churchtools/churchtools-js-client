@@ -369,10 +369,11 @@ class ChurchToolsClient {
     }
 
     post<ResponseType>(uri: string, data: Params = {}, options: PostOptions = {}) {
+        const isNodeJsFormData = data && data.constructor && data.constructor.name === 'FormData';
         // FormData will be sent as multipart/form-data and the CT server requires a CSRF token for such a request
-        // React-Native mangles the constructor.name. Therefore another check must be applied to react-native
+        // React-Native mangles the constructor.name. Therefore, another check must be applied to react-native
         const needsCsrfToken =
-            (!globalThis.FormData && data && data.constructor && data.constructor.name === 'FormData') || // Node-JS
+            isNodeJsFormData || // Node-JS
             (globalThis.FormData && data instanceof FormData); // browser/react-native
         const needsAuthentication = options.needsAuthentication;
 
@@ -402,6 +403,16 @@ class ChurchToolsClient {
                             config.headers = {
                                 ...config.headers,
                                 'CSRF-Token': this.csrfToken ?? '',
+                            };
+                        }
+                        // Axios 0.24.0 in Node.js does not automatically set the Content-Type header for FormData
+                        // objects, nor does it set the boundary for the multipart/form-data content type.
+                        if (isNodeJsFormData) {
+                            config.headers = {
+                                ...config.headers,
+                                // @ts-ignore
+                                ...data.getHeaders(),
+                                'Content-Type': 'multipart/form-data',
                             };
                         }
                         config.signal = this.getAbortSignal(options.abortController, options.timeout);
