@@ -546,7 +546,7 @@ class ChurchToolsClient {
         config: AxiosRequestConfig,
         loginToken: string,
         personId: undefined | number,
-        resolve: Resolver<any>,
+        resolve: Resolver<AxiosResponse>,
         reject: Rejecter,
         previousError: any
     ) {
@@ -594,7 +594,7 @@ class ChurchToolsClient {
         }
 
         const handleUnauthorized = (response: AxiosResponse, errorObject?: any) =>
-            new Promise((resolve, reject) => {
+            new Promise<AxiosResponse>((resolve, reject) => {
                 if (response && response.status === STATUS_UNAUTHORIZED) {
                     if (response.config && response.config.params && response.config.params[CUSTOM_RETRY_PARAM]) {
                         this.notifyUnauthenticated();
@@ -614,7 +614,7 @@ class ChurchToolsClient {
             });
 
         this.unauthorizedInterceptorId = this.ax.interceptors.response.use(
-            (response) => {
+            (response: AxiosResponse) => {
                 // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
                 // So technically we should be here only in case of a successful request.
                 // However, the old ChurchTools API returns { message: 'Session expired' } and a 200 status code
@@ -650,7 +650,7 @@ class ChurchToolsClient {
         }
 
         const handleRateLimited = (response: AxiosResponse, errorObject?: any) =>
-            new Promise((resolve, reject) => {
+            new Promise<AxiosResponse>((resolve, reject) => {
                 if (response && response.status === STATUS_RATELIMITED) {
                     logMessage('rate limit reached, waiting ' + this.rateLimitTimeout + ' milliseconds.');
                     this.delay(this.rateLimitTimeout)
@@ -670,7 +670,7 @@ class ChurchToolsClient {
             });
 
         this.rateLimitInterceptorId = this.ax.interceptors.response.use(
-            (response) => {
+            (response: AxiosResponse) => {
                 // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
                 // So technically we should be here only in case of a successful request.
                 // However, for some unknown reason, when using axios-cookiejar-support Axios also calls

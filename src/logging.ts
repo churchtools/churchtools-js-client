@@ -1,5 +1,5 @@
 import * as AxiosLogger from 'axios-logger';
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 enum LOG_LEVEL {
     /**
@@ -41,7 +41,7 @@ const deactivateLogging = () => {
     logLevel = LOG_LEVEL.NONE;
 };
 
-const logRequest = (request: AxiosRequestConfig) => {
+const logRequest = (request: InternalAxiosRequestConfig) => {
     if (logLevel < LOG_LEVEL.INFO) {
         return request;
     }
