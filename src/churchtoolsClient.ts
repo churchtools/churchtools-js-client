@@ -34,16 +34,14 @@ export type PageResponse<Result> = {
 };
 
 type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
+type Rejecter = (error: any) => void;
 
 type RequestOptions = { enforceJSON?: boolean; needsAuthentication?: boolean; timeout?: number };
-
 type GetOptions = RequestOptions & { rawResponse?: boolean; callDeferred?: boolean };
 type PutOptions = RequestOptions;
 type PostOptions = RequestOptions & { abortController?: AbortController };
 type DeleteOptions = RequestOptions;
 type PatchOptions = RequestOptions;
-
-type Rejecter = (error: any) => void;
 
 class ChurchToolsClient {
     private churchToolsBaseUrl?: string;
@@ -213,7 +211,7 @@ class ChurchToolsClient {
                                     'CSRF-Token': this.csrfToken ?? '',
                                 },
                                 signal: this.getAbortSignal(),
-                            }
+                            },
                         );
                     })
                     .then((response) => {
@@ -225,7 +223,7 @@ class ChurchToolsClient {
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -241,7 +239,7 @@ class ChurchToolsClient {
             this.enforceJSON;
         if (enforceJSON && response.status !== 204 && response.data && typeof response.data !== 'object') {
             throw new NoJSONError(
-                "Request to '" + response.config.url + "' returned no JSON. Return value is:\n " + response.data
+                "Request to '" + response.config.url + "' returned no JSON. Return value is:\n " + response.data,
             );
         }
     }
@@ -261,19 +259,21 @@ class ChurchToolsClient {
         uri: string,
         params?: Params,
         rawResponse?: boolean,
-        callDeferred?: boolean
+        callDeferred?: boolean,
     ): Promise<ResponseType>;
     get<ResponseType>(uri: string, params?: Params, options?: GetOptions): Promise<ResponseType>;
     get<ResponseType>(
         uri: string,
         params = {},
         rawResponseOrOptions: boolean | GetOptions = false,
-        callDeferred = true
+        callDeferred = true,
     ) {
         const rawResponse =
-            typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.rawResponse ?? false : rawResponseOrOptions;
+            typeof rawResponseOrOptions === 'object'
+                ? (rawResponseOrOptions.rawResponse ?? false)
+                : rawResponseOrOptions;
         callDeferred =
-            typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.callDeferred ?? true : callDeferred;
+            typeof rawResponseOrOptions === 'object' ? (rawResponseOrOptions.callDeferred ?? true) : callDeferred;
         const enforceJson = typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.enforceJSON : undefined;
         const needsAuthentication =
             typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.needsAuthentication : undefined;
@@ -324,7 +324,7 @@ class ChurchToolsClient {
         page: number,
         resolve: Resolver<ResponseType[]>,
         reject: Rejecter,
-        result: ResponseType[] = []
+        result: ResponseType[] = [],
     ) {
         params.page = page;
         this.get<PageResponse<ResponseType[]>>(uri, params, true)
@@ -356,14 +356,14 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        { signal: this.getAbortSignal(undefined, options.timeout), headers }
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -425,7 +425,7 @@ class ChurchToolsClient {
                                       ...data,
                                       [ENFORCE_JSON_PARAM]: options.enforceJSON,
                                   },
-                            config
+                            config,
                         );
                     })
                     .then((response) => {
@@ -433,7 +433,7 @@ class ChurchToolsClient {
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -455,14 +455,14 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options.enforceJSON,
                         },
-                        { signal: this.getAbortSignal(undefined, options.timeout), headers }
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -488,7 +488,7 @@ class ChurchToolsClient {
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -512,7 +512,7 @@ class ChurchToolsClient {
                 {
                     rawResponse: false,
                     callDeferred: false,
-                }
+                },
             )
                 .then(() => {
                     logMessage('Successfully logged in again with login token');
@@ -548,7 +548,7 @@ class ChurchToolsClient {
         personId: undefined | number,
         resolve: Resolver<AxiosResponse>,
         reject: Rejecter,
-        previousError: any
+        previousError: any,
     ) {
         logWarning('Trying transparent relogin with login token');
         this.loginWithToken(loginToken, personId)
@@ -632,7 +632,7 @@ class ChurchToolsClient {
                     return Promise.resolve(response);
                 }
             },
-            (errorObject) => handleUnauthorized(errorObject.response, errorObject)
+            (errorObject) => handleUnauthorized(errorObject.response, errorObject),
         );
         this.hasToken = !!loginToken;
     }
@@ -683,14 +683,14 @@ class ChurchToolsClient {
                     return Promise.resolve(response);
                 }
             },
-            (errorObject) => handleRateLimited(errorObject.response, errorObject)
+            (errorObject) => handleRateLimited(errorObject.response, errorObject),
         );
     }
 
     validChurchToolsUrl(
         url: string,
         compareBuild = MINIMAL_CHURCHTOOLS_BUILD_VERSION,
-        minimalVersion = MINIMAL_CHURCHTOOLS_VERSION
+        minimalVersion = MINIMAL_CHURCHTOOLS_VERSION,
     ) {
         const infoApiPath = '/api/info';
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
@@ -754,7 +754,7 @@ class ChurchToolsClient {
         });
     }
 
-    setCookieJar(axiosCookieJarSupport: any, jar: any) {
+    setCookieJar(axiosCookieJarSupport: (axios: AxiosInstance) => AxiosInstance, jar: any) {
         this.ax = axiosCookieJarSupport(this.ax);
         // @ts-ignore
         this.ax.defaults.jar = jar;
