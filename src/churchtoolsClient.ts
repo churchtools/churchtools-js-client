@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { logRequest, logResponse, logError, logMessage, logWarning } from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 import { NoJSONError } from './NoJSONError';
