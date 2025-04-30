@@ -29,3 +29,6 @@ jobs:
     - run: npm test
     - run: npm run prettier-list-different
     - run: npm run eslint
+    - run: npm publish --access public --tag beta
+      env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
