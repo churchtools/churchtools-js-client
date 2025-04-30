@@ -9,8 +9,8 @@
   "author": "Jan Pawellek <jpawellek@churchtools.de>",
   "license": "Apache-2.0",
   "dependencies": {
-    "axios-cookiejar-support": "^4.0.0",
     "@churchtools/churchtools-client": "../../",
+    "axios-cookiejar-support": "^4.0.0",
     "tough-cookie": "^4.0.0"
   }
 }

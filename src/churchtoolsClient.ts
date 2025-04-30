@@ -16,11 +16,11 @@ export type Params = Record<string, any>;
 
 export type RawResponse<Result> =
     | {
-          data: Result;
-      }
+        data: Result;
+    }
     | {
-          data: { data: Result };
-      };
+        data: { data: Result };
+    };
 
 export type PageResponse<Result> = {
     data: {
@@ -239,7 +239,7 @@ class ChurchToolsClient {
             this.enforceJSON;
         if (enforceJSON && response.status !== 204 && response.data && typeof response.data !== 'object') {
             throw new NoJSONError(
-                "Request to '" + response.config.url + "' returned no JSON. Return value is:\n " + response.data,
+                `Request to '${response.config.url}' returned no JSON. Return value is:\n ${response.data}`,
             );
         }
     }
@@ -422,9 +422,9 @@ class ChurchToolsClient {
                             needsCsrfToken
                                 ? data
                                 : {
-                                      ...data,
-                                      [ENFORCE_JSON_PARAM]: options.enforceJSON,
-                                  },
+                                    ...data,
+                                    [ENFORCE_JSON_PARAM]: options.enforceJSON,
+                                },
                             config,
                         );
                     })

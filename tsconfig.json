@@ -6,6 +6,7 @@
       "es2021",
       "esnext"
     ],
+    "esModuleInterop": true,
     "moduleResolution": "Node",
     "strict": true,
     "declarationDir": "dist",
