@@ -12,8 +12,6 @@ describe('churchtoolsClient', () => {
 
     it('should fail for invalid credentials', async () => {
         let ctc = new ChurchToolsClient('https://review.church.tools', 'foobar', true);
-        //ctc.setRateLimitInterceptor();
-        //ctc.setCookieJar(axiosCookieJarSupport.default, new tough.CookieJar());
 
         await expect(ctc.get('/contactlabels')).rejects.toHaveProperty('statusText', 'Unauthorized');
     });

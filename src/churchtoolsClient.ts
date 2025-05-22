@@ -735,9 +735,9 @@ class ChurchToolsClient {
         });
     }
 
-    setCookieJar(axiosCookieJarSupport: (axios: AxiosInstance) => AxiosInstance, jar: any) {
+    setCookieJar(axiosCookieJarSupport: (axios: AxiosInstance) => AxiosInstance, jar: unknown) {
         this.ax = axiosCookieJarSupport(this.ax);
-        // @ts-ignore
+        // @ts-expect-error axios.defaults.jar is added by npm package axios-cookiejar-support
         this.ax.defaults.jar = jar;
     }
 }

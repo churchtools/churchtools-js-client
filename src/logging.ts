@@ -42,7 +42,6 @@ const logRequest = (request: InternalAxiosRequestConfig) => {
     if (logLevel < LOG_LEVEL.INFO) {
         return request;
     }
-    // @ts-ignore There is a mismatch in the types of axios and axios-logger
     return AxiosLogger.requestLogger(request, getAxiosLoggerConfig()) as InternalAxiosRequestConfig;
 };
 
@@ -50,7 +49,6 @@ const logResponse = (response: AxiosResponse) => {
     if (logLevel < LOG_LEVEL.INFO) {
         return response;
     }
-    // @ts-ignore There is a mismatch in the types of axios and axios-logger
     return AxiosLogger.responseLogger(response, getAxiosLoggerConfig());
 };
 
@@ -58,7 +56,6 @@ const logError = (error: AxiosError) => {
     if (logLevel < LOG_LEVEL.ERROR) {
         return Promise.reject(error);
     }
-    // @ts-ignore There is a mismatch in the types of axios and axios-logger
     return AxiosLogger.errorLogger(error, getAxiosLoggerConfig(LOG_LEVEL.ERROR));
 };
 

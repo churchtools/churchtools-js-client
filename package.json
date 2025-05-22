@@ -11,7 +11,8 @@
         "watch": "webpack --watch",
         "prettier": "prettier --write \"src/**/*.ts\"",
         "prettier-list-different": "prettier --list-different \"src/**/*.ts\"",
-        "eslint": "eslint src/**/*.ts"
+        "eslint": "eslint src/**/*.ts",
+        "check:types": "tsc --noEmit"
     },
     "keywords": [
         "churchtools",
