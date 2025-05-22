@@ -25,7 +25,7 @@ const generateConfig = (extraTarget, outputFile, includeLibraries) => ({
                             }]
                         ]
                     }
-                }, {loader: 'ts-loader'}]
+                }, { loader: 'ts-loader' }]
             }
         ]
     },
@@ -40,4 +40,7 @@ const generateConfig = (extraTarget, outputFile, includeLibraries) => ({
     }
 });
 
-module.exports = [generateConfig('web', 'churchtools-client.js', false), generateConfig('web', 'churchtools-client.bundled.js', true), generateConfig('node', 'churchtools-client.node.js', false)];
+module.exports = [
+    generateConfig('web', 'churchtools-client.js', false),
+    generateConfig('web', 'churchtools-client.bundled.js', true)
+];

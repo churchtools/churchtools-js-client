@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { logRequest, logResponse, logError, logMessage, logWarning } from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 import { NoJSONError } from './NoJSONError';
@@ -34,16 +34,14 @@ export type PageResponse<Result> = {
 };
 
 type Resolver<Result> = (result: Result | PromiseLike<Result>) => void;
+type Rejecter = (error: any) => void;
 
 type RequestOptions = { enforceJSON?: boolean; needsAuthentication?: boolean; timeout?: number };
-
 type GetOptions = RequestOptions & { rawResponse?: boolean; callDeferred?: boolean };
 type PutOptions = RequestOptions;
 type PostOptions = RequestOptions & { abortController?: AbortController };
 type DeleteOptions = RequestOptions;
 type PatchOptions = RequestOptions;
-
-type Rejecter = (error: any) => void;
 
 class ChurchToolsClient {
     private churchToolsBaseUrl?: string;
@@ -135,15 +133,10 @@ class ChurchToolsClient {
             this.deferredRequestCallbacks.push(callback);
         } else {
             this.firstRequestStarted = true;
-            callback()
-                .catch(() => {
-                    this.firstRequestCompleted = true;
-                    this.processDeferredRequestCallbacks();
-                })
-                .then(() => {
-                    this.firstRequestCompleted = true;
-                    this.processDeferredRequestCallbacks();
-                });
+            callback().finally(() => {
+                this.firstRequestCompleted = true;
+                this.processDeferredRequestCallbacks();
+            });
         }
     }
 
@@ -170,14 +163,11 @@ class ChurchToolsClient {
         }
     }
 
-    getAbortSignal(abortController?: AbortController, timeout?: number) {
-        if (!abortController) {
-            abortController = new AbortController();
-        }
+    getAbortSignal(abortController: AbortController = new AbortController(), timeout?: number) {
         setTimeout(() => {
-            abortController!.abort();
+            abortController.abort();
         }, timeout ?? this.requestTimeout);
-        return abortController!.signal;
+        return abortController.signal;
     }
 
     /**
@@ -213,7 +203,7 @@ class ChurchToolsClient {
                                     'CSRF-Token': this.csrfToken ?? '',
                                 },
                                 signal: this.getAbortSignal(),
-                            }
+                            },
                         );
                     })
                     .then((response) => {
@@ -225,7 +215,7 @@ class ChurchToolsClient {
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -241,7 +231,7 @@ class ChurchToolsClient {
             this.enforceJSON;
         if (enforceJSON && response.status !== 204 && response.data && typeof response.data !== 'object') {
             throw new NoJSONError(
-                "Request to '" + response.config.url + "' returned no JSON. Return value is:\n " + response.data
+                `Request to '${response.config.url}' returned no JSON. Return value is:\n ${response.data}`,
             );
         }
     }
@@ -261,19 +251,21 @@ class ChurchToolsClient {
         uri: string,
         params?: Params,
         rawResponse?: boolean,
-        callDeferred?: boolean
+        callDeferred?: boolean,
     ): Promise<ResponseType>;
     get<ResponseType>(uri: string, params?: Params, options?: GetOptions): Promise<ResponseType>;
     get<ResponseType>(
         uri: string,
         params = {},
         rawResponseOrOptions: boolean | GetOptions = false,
-        callDeferred = true
+        callDeferred = true,
     ) {
         const rawResponse =
-            typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.rawResponse ?? false : rawResponseOrOptions;
+            typeof rawResponseOrOptions === 'object'
+                ? (rawResponseOrOptions.rawResponse ?? false)
+                : rawResponseOrOptions;
         callDeferred =
-            typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.callDeferred ?? true : callDeferred;
+            typeof rawResponseOrOptions === 'object' ? (rawResponseOrOptions.callDeferred ?? true) : callDeferred;
         const enforceJson = typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.enforceJSON : undefined;
         const needsAuthentication =
             typeof rawResponseOrOptions === 'object' ? rawResponseOrOptions.needsAuthentication : undefined;
@@ -324,7 +316,7 @@ class ChurchToolsClient {
         page: number,
         resolve: Resolver<ResponseType[]>,
         reject: Rejecter,
-        result: ResponseType[] = []
+        result: ResponseType[] = [],
     ) {
         params.page = page;
         this.get<PageResponse<ResponseType[]>>(uri, params, true)
@@ -356,25 +348,24 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        { signal: this.getAbortSignal(undefined, options.timeout), headers }
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
 
     post<ResponseType>(uri: string, data: Params = {}, options: PostOptions = {}) {
-        const isNodeJsFormData = data && data.constructor && data.constructor.name === 'FormData';
         // FormData will be sent as multipart/form-data and the CT server requires a CSRF token for such a request
         // React-Native mangles the constructor.name. Therefore, another check must be applied to react-native
-        const needsCsrfToken =
-            isNodeJsFormData || // Node-JS
-            (globalThis.FormData && data instanceof FormData); // browser/react-native
+        const isNodeJsFormData = data && data.constructor && data.constructor.name === 'FormData';
+        const isBrowserOrReactNativeFormData = globalThis.FormData && data instanceof globalThis.FormData;
+        const needsCsrfToken = isNodeJsFormData || isBrowserOrReactNativeFormData;
         const needsAuthentication = options.needsAuthentication;
 
         const headers: Record<string, any> = {};
@@ -389,7 +380,7 @@ class ChurchToolsClient {
                         if (!needsCsrfToken || this.csrfToken) {
                             return Promise.resolve();
                         }
-                        return this.get('/csrftoken').then((response) => {
+                        return this.get('/csrftoken', undefined, { callDeferred: false }).then((response) => {
                             if (typeof response === 'string') {
                                 this.csrfToken = response;
                             }
@@ -405,16 +396,6 @@ class ChurchToolsClient {
                                 'CSRF-Token': this.csrfToken ?? '',
                             };
                         }
-                        // Axios 0.24.0 in Node.js does not automatically set the Content-Type header for FormData
-                        // objects, nor does it set the boundary for the multipart/form-data content type.
-                        if (isNodeJsFormData) {
-                            config.headers = {
-                                ...config.headers,
-                                // @ts-ignore
-                                ...data.getHeaders(),
-                                'Content-Type': 'multipart/form-data',
-                            };
-                        }
                         config.signal = this.getAbortSignal(options.abortController, options.timeout);
 
                         return this.ax.post(
@@ -425,7 +406,7 @@ class ChurchToolsClient {
                                       ...data,
                                       [ENFORCE_JSON_PARAM]: options.enforceJSON,
                                   },
-                            config
+                            config,
                         );
                     })
                     .then((response) => {
@@ -433,7 +414,7 @@ class ChurchToolsClient {
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -455,14 +436,14 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options.enforceJSON,
                         },
-                        { signal: this.getAbortSignal(undefined, options.timeout), headers }
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -488,7 +469,7 @@ class ChurchToolsClient {
                     })
                     .catch((error) => {
                         reject(error);
-                    })
+                    }),
             );
         });
     }
@@ -512,7 +493,7 @@ class ChurchToolsClient {
                 {
                     rawResponse: false,
                     callDeferred: false,
-                }
+                },
             )
                 .then(() => {
                     logMessage('Successfully logged in again with login token');
@@ -546,9 +527,9 @@ class ChurchToolsClient {
         config: AxiosRequestConfig,
         loginToken: string,
         personId: undefined | number,
-        resolve: Resolver<any>,
+        resolve: Resolver<AxiosResponse>,
         reject: Rejecter,
-        previousError: any
+        previousError: any,
     ) {
         logWarning('Trying transparent relogin with login token');
         this.loginWithToken(loginToken, personId)
@@ -594,7 +575,7 @@ class ChurchToolsClient {
         }
 
         const handleUnauthorized = (response: AxiosResponse, errorObject?: any) =>
-            new Promise((resolve, reject) => {
+            new Promise<AxiosResponse>((resolve, reject) => {
                 if (response && response.status === STATUS_UNAUTHORIZED) {
                     if (response.config && response.config.params && response.config.params[CUSTOM_RETRY_PARAM]) {
                         this.notifyUnauthenticated();
@@ -614,7 +595,7 @@ class ChurchToolsClient {
             });
 
         this.unauthorizedInterceptorId = this.ax.interceptors.response.use(
-            (response) => {
+            (response: AxiosResponse) => {
                 // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
                 // So technically we should be here only in case of a successful request.
                 // However, the old ChurchTools API returns { message: 'Session expired' } and a 200 status code
@@ -632,7 +613,7 @@ class ChurchToolsClient {
                     return Promise.resolve(response);
                 }
             },
-            (errorObject) => handleUnauthorized(errorObject.response, errorObject)
+            (errorObject) => handleUnauthorized(errorObject.response, errorObject),
         );
         this.hasToken = !!loginToken;
     }
@@ -650,7 +631,7 @@ class ChurchToolsClient {
         }
 
         const handleRateLimited = (response: AxiosResponse, errorObject?: any) =>
-            new Promise((resolve, reject) => {
+            new Promise<AxiosResponse>((resolve, reject) => {
                 if (response && response.status === STATUS_RATELIMITED) {
                     logMessage('rate limit reached, waiting ' + this.rateLimitTimeout + ' milliseconds.');
                     this.delay(this.rateLimitTimeout)
@@ -670,7 +651,7 @@ class ChurchToolsClient {
             });
 
         this.rateLimitInterceptorId = this.ax.interceptors.response.use(
-            (response) => {
+            (response: AxiosResponse) => {
                 // onFullfilled (this current function) is called by Axios in case of a 2xx status code.
                 // So technically we should be here only in case of a successful request.
                 // However, for some unknown reason, when using axios-cookiejar-support Axios also calls
@@ -683,14 +664,14 @@ class ChurchToolsClient {
                     return Promise.resolve(response);
                 }
             },
-            (errorObject) => handleRateLimited(errorObject.response, errorObject)
+            (errorObject) => handleRateLimited(errorObject.response, errorObject),
         );
     }
 
     validChurchToolsUrl(
         url: string,
         compareBuild = MINIMAL_CHURCHTOOLS_BUILD_VERSION,
-        minimalVersion = MINIMAL_CHURCHTOOLS_VERSION
+        minimalVersion = MINIMAL_CHURCHTOOLS_VERSION,
     ) {
         const infoApiPath = '/api/info';
         const infoEndpoint = `${toCorrectChurchToolsUrl(url)}${infoApiPath}`;
@@ -754,9 +735,9 @@ class ChurchToolsClient {
         });
     }
 
-    setCookieJar(axiosCookieJarSupport: any, jar: any) {
+    setCookieJar(axiosCookieJarSupport: (axios: AxiosInstance) => AxiosInstance, jar: unknown) {
         this.ax = axiosCookieJarSupport(this.ax);
-        // @ts-ignore
+        // @ts-expect-error axios.defaults.jar is added by npm package axios-cookiejar-support
         this.ax.defaults.jar = jar;
     }
 }

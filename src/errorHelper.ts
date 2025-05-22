@@ -19,7 +19,7 @@ const getFromResponse = (error: any, translationFunction?: TranslationFunction, 
 const getFromResponseData = (
     response: any,
     translationFunction?: TranslationFunction,
-    keyOnly = false
+    keyOnly = false,
 ): string | null => {
     if (!response) {
         return null;
