@@ -16,11 +16,11 @@ export type Params = Record<string, any>;
 
 export type RawResponse<Result> =
     | {
-    data: Result;
-}
+          data: Result;
+      }
     | {
-    data: { data: Result };
-};
+          data: { data: Result };
+      };
 
 export type PageResponse<Result> = {
     data: {
@@ -49,11 +49,7 @@ class ChurchToolsClient {
     private loadCSRFForOldApi: boolean;
     private ax: AxiosInstance;
     private unauthorizedInterceptorId?: number;
-    private unauthenticatedCallbacks: ((info: {
-        error?: Error,
-        url?: string
-        baseUrl?: string
-    }) => void)[] = [];
+    private unauthenticatedCallbacks: ((info: { error?: Error; url?: string; baseUrl?: string }) => void)[] = [];
     private rateLimitInterceptorId?: number;
     private firstRequestStarted = false;
     private firstRequestCompleted = false;
@@ -113,7 +109,7 @@ class ChurchToolsClient {
         this.churchToolsBaseUrl = baseUrl.replace(/\/$/, '');
     }
 
-    getBaseUrl(){
+    getBaseUrl() {
         return this.churchToolsBaseUrl;
     }
 
@@ -160,7 +156,7 @@ class ChurchToolsClient {
     }
 
     buildOldRequestObject(func: string, params: Params) {
-        return Object.assign({}, params, {func: func});
+        return Object.assign({}, params, { func: func });
     }
 
     responseToData<Data>(response: RawResponse<Data>) {
@@ -218,7 +214,7 @@ class ChurchToolsClient {
                         if (response.data.status === 'success') {
                             resolve(this.responseToData(response));
                         } else {
-                            reject({response: response});
+                            reject({ response: response });
                         }
                     })
                     .catch((error) => {
@@ -286,7 +282,7 @@ class ChurchToolsClient {
         const cb = (resolve: Resolver<ResponseType>, reject: Rejecter) =>
             this.ax
                 .get(this.buildUrl(uri), {
-                    params: {...params, [ENFORCE_JSON_PARAM]: enforceJson},
+                    params: { ...params, [ENFORCE_JSON_PARAM]: enforceJson },
                     signal: this.getAbortSignal(),
                     headers,
                 })
@@ -356,7 +352,7 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options?.enforceJSON,
                         },
-                        {signal: this.getAbortSignal(undefined, options.timeout), headers},
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -388,7 +384,7 @@ class ChurchToolsClient {
                         if (!needsCsrfToken || this.csrfToken) {
                             return Promise.resolve();
                         }
-                        return this.get('/csrftoken', undefined, {callDeferred: false}).then((response) => {
+                        return this.get('/csrftoken', undefined, { callDeferred: false }).then((response) => {
                             if (typeof response === 'string') {
                                 this.csrfToken = response;
                             }
@@ -411,9 +407,9 @@ class ChurchToolsClient {
                             needsCsrfToken
                                 ? data
                                 : {
-                                    ...data,
-                                    [ENFORCE_JSON_PARAM]: options.enforceJSON,
-                                },
+                                      ...data,
+                                      [ENFORCE_JSON_PARAM]: options.enforceJSON,
+                                  },
                             config,
                         );
                     })
@@ -444,7 +440,7 @@ class ChurchToolsClient {
                             ...data,
                             [ENFORCE_JSON_PARAM]: options.enforceJSON,
                         },
-                        {signal: this.getAbortSignal(undefined, options.timeout), headers},
+                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -468,7 +464,7 @@ class ChurchToolsClient {
             this.deferredExecution(() =>
                 this.ax
                     .delete(this.buildUrl(uri), {
-                        data: {...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON},
+                        data: { ...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON },
                         signal: this.getAbortSignal(undefined, options?.timeout),
                         headers,
                     })
@@ -482,11 +478,7 @@ class ChurchToolsClient {
         });
     }
 
-    notifyUnauthenticated(data: {
-        error?: Error,
-        url?: string
-        baseUrl?: string
-    }) {
+    notifyUnauthenticated(data: { error?: Error; url?: string; baseUrl?: string }) {
         logMessage('Notifying unauthenticated.');
         this.unauthenticatedCallbacks.forEach((callback) => callback(data));
     }
@@ -526,8 +518,7 @@ class ChurchToolsClient {
                     return res;
                 })
                 .catch((e) => {
-                    logError(e).catch(() => {
-                    }); // catch is needed as logError can return a rejected promise
+                    logError(e).catch(() => {}); // catch is needed as logError can return a rejected promise
                     this.loginRunning = false;
                     this.currentLoginPromise = undefined;
                     throw e;
@@ -571,7 +562,7 @@ class ChurchToolsClient {
                         ) {
                             logMessage('Failed to login with login token', error);
                             reject(error);
-                            this.notifyUnauthenticated({error, url: config.url, baseUrl: config.baseURL});
+                            this.notifyUnauthenticated({ error, url: config.url, baseUrl: config.baseURL });
                         } else {
                             reject(error);
                         }
@@ -594,7 +585,7 @@ class ChurchToolsClient {
                         this.notifyUnauthenticated({
                             error: errorObject,
                             url: response.config.url,
-                            baseUrl: response.config.baseURL
+                            baseUrl: response.config.baseURL,
                         });
                         reject(errorObject || response);
                     } else {
@@ -605,7 +596,7 @@ class ChurchToolsClient {
                             this.notifyUnauthenticated({
                                 error: errorObject,
                                 url: response.config.url,
-                                baseUrl: response.config.baseURL
+                                baseUrl: response.config.baseURL,
                             });
                             reject(errorObject || response);
                         }
@@ -639,11 +630,7 @@ class ChurchToolsClient {
         this.hasToken = !!loginToken;
     }
 
-    onUnauthenticated(callback: (info: {
-        error?: Error,
-        url?: string
-        baseUrl?: string
-    }) => void) {
+    onUnauthenticated(callback: (info: { error?: Error; url?: string; baseUrl?: string }) => void) {
         this.unauthenticatedCallbacks.push(callback);
     }
 
