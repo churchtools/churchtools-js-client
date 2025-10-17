@@ -49,7 +49,7 @@ class ChurchToolsClient {
     private loadCSRFForOldApi: boolean;
     private ax: AxiosInstance;
     private unauthorizedInterceptorId?: number;
-    private unauthenticatedCallbacks: (() => any)[] = [];
+    private unauthenticatedCallbacks: ((info: { error?: Error; url?: string; baseUrl?: string }) => void)[] = [];
     private rateLimitInterceptorId?: number;
     private firstRequestStarted = false;
     private firstRequestCompleted = false;
@@ -107,6 +107,10 @@ class ChurchToolsClient {
      */
     setBaseUrl(baseUrl: string) {
         this.churchToolsBaseUrl = baseUrl.replace(/\/$/, '');
+    }
+
+    getBaseUrl() {
+        return this.churchToolsBaseUrl;
     }
 
     setRateLimitTimeout(timeoutInMs: number) {
@@ -474,9 +478,9 @@ class ChurchToolsClient {
         });
     }
 
-    notifyUnauthenticated() {
+    notifyUnauthenticated(data: { error?: Error; url?: string; baseUrl?: string }) {
         logMessage('Notifying unauthenticated.');
-        this.unauthenticatedCallbacks.forEach((callback) => callback());
+        this.unauthenticatedCallbacks.forEach((callback) => callback(data));
     }
 
     loginWithToken(loginToken: string, personId?: number) {
@@ -558,7 +562,7 @@ class ChurchToolsClient {
                         ) {
                             logMessage('Failed to login with login token', error);
                             reject(error);
-                            this.notifyUnauthenticated();
+                            this.notifyUnauthenticated({ error, url: config.url, baseUrl: config.baseURL });
                         } else {
                             reject(error);
                         }
@@ -578,14 +582,22 @@ class ChurchToolsClient {
             new Promise<AxiosResponse>((resolve, reject) => {
                 if (response && response.status === STATUS_UNAUTHORIZED) {
                     if (response.config && response.config.params && response.config.params[CUSTOM_RETRY_PARAM]) {
-                        this.notifyUnauthenticated();
+                        this.notifyUnauthenticated({
+                            error: errorObject,
+                            url: response.config.url,
+                            baseUrl: response.config.baseURL,
+                        });
                         reject(errorObject || response);
                     } else {
                         logMessage('Got 401 session expired');
                         if (loginToken) {
                             this.retryWithLogin(response.config, loginToken, personId, resolve, reject, response);
                         } else {
-                            this.notifyUnauthenticated();
+                            this.notifyUnauthenticated({
+                                error: errorObject,
+                                url: response.config.url,
+                                baseUrl: response.config.baseURL,
+                            });
                             reject(errorObject || response);
                         }
                     }
@@ -618,7 +630,7 @@ class ChurchToolsClient {
         this.hasToken = !!loginToken;
     }
 
-    onUnauthenticated(callback: () => void) {
+    onUnauthenticated(callback: (info: { error?: Error; url?: string; baseUrl?: string }) => void) {
         this.unauthenticatedCallbacks.push(callback);
     }
 
