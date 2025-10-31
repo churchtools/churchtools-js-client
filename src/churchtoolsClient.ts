@@ -72,6 +72,9 @@ class ChurchToolsClient {
         this.ax = axios.create({
             baseURL: churchToolsBaseUrl,
             withCredentials: true,
+            headers: {
+                'User-Agent': 'churchtools-js-client',
+            }
         });
 
         this.ax.interceptors.request.use(logRequest, logError);
