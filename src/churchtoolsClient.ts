@@ -155,6 +155,10 @@ class ChurchToolsClient {
         this.ax.defaults.withCredentials = true;
     }
 
+    setUserAgent(userAgent: string) {
+        this.ax.defaults.headers['User-Agent'] = userAgent;
+    }
+
     buildOldRequestObject(func: string, params: Params) {
         return Object.assign({}, params, { func: func });
     }
