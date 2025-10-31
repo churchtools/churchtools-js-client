@@ -6,7 +6,7 @@ import { NoJSONError } from './NoJSONError';
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
 const DEFAULT_TIMEOUT = 15000;
-const RATE_LIMIT_TIMEOUT = 30000;
+const RATE_LIMIT_TIMEOUT = 10000;
 const STATUS_UNAUTHORIZED = 401;
 const STATUS_RATELIMITED = 429;
 const CUSTOM_RETRY_PARAM = 'X-retry-login';
@@ -655,7 +655,12 @@ class ChurchToolsClient {
                             resolve(response);
                         })
                         .catch((error) => {
-                            reject(error);
+                            // If the retry also resulted in a 429, recursively handle it
+                            if (error.response && error.response.status === STATUS_RATELIMITED) {
+                                handleRateLimited(error.response, error).then(resolve).catch(reject);
+                            } else {
+                                reject(error);
+                            }
                         });
                 } else {
                     reject(errorObject || response);
