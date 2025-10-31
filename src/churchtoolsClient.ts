@@ -74,7 +74,7 @@ class ChurchToolsClient {
             withCredentials: true,
             headers: {
                 'User-Agent': 'churchtools-js-client',
-            }
+            },
         });
 
         this.ax.interceptors.request.use(logRequest, logError);
