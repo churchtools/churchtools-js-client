@@ -2,6 +2,7 @@ import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse 
 import { logRequest, logResponse, logError, logMessage, logWarning } from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 import { NoJSONError } from './NoJSONError';
+import packageJson from '../package.json';
 
 const MINIMAL_CHURCHTOOLS_BUILD_VERSION = 31413;
 const MINIMAL_CHURCHTOOLS_VERSION = '3.54.2';
@@ -73,7 +74,7 @@ class ChurchToolsClient {
             baseURL: churchToolsBaseUrl,
             withCredentials: true,
             headers: {
-                'User-Agent': 'churchtools-js-client',
+                'User-Agent': `churchtools-js-client/${packageJson.version}`,
             },
         });
 
