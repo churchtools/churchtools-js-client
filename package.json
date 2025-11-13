@@ -4,7 +4,7 @@
     "description": "Client library to interact with a ChurchTools Server.",
     "main": "dist/churchtools-client.js",
     "browser": "dist/churchtools-client.js",
-    "types": "dist/index.d.ts",
+    "types": "dist/src/index.d.ts",
     "scripts": {
         "test": "jest",
         "build": "webpack",

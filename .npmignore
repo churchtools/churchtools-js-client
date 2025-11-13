@@ -1,5 +1,6 @@
 *
 !dist/*
+!dist/src/*
 !CHANGELOG.md
 !LICENSE
 !README.md
