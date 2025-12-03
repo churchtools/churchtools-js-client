@@ -39,4 +39,19 @@ describe('churchtoolsClient', () => {
 
         mockServer.close();
     });
+
+    it('should allow overriding the User-Agent header', () => {
+        const ctc = new ChurchToolsClient('http://jest.test');
+        
+        // Check that the default User-Agent is set
+        const defaultUserAgent = ctc.ax.defaults.headers['User-Agent'];
+        expect(defaultUserAgent).toMatch(/^churchtools-js-client\//);
+        
+        // Override the User-Agent
+        const customUserAgent = 'my-custom-agent/1.0.0';
+        ctc.setUserAgent(customUserAgent);
+        
+        // Verify it was overridden
+        expect(ctc.ax.defaults.headers['User-Agent']).toBe(customUserAgent);
+    });
 });
