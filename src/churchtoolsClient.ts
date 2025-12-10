@@ -40,7 +40,7 @@ type Rejecter = (error: any) => void;
 type RequestOptions = { enforceJSON?: boolean; needsAuthentication?: boolean; timeout?: number };
 type GetOptions = RequestOptions & { rawResponse?: boolean; callDeferred?: boolean };
 type PutOptions = RequestOptions;
-type PostOptions = RequestOptions & { abortController?: AbortController };
+type PostOptions = RequestOptions & { abortController?: AbortController; contentType?: string };
 type DeleteOptions = RequestOptions;
 type PatchOptions = RequestOptions;
 
@@ -379,10 +379,15 @@ class ChurchToolsClient {
         const isBrowserOrReactNativeFormData = globalThis.FormData && data instanceof globalThis.FormData;
         const needsCsrfToken = isNodeJsFormData || isBrowserOrReactNativeFormData;
         const needsAuthentication = options.needsAuthentication;
+        const contentType = options.contentType;
 
         const headers: Record<string, any> = {};
         if (needsAuthentication !== undefined) {
             headers['X-OnlyAuthenticated'] = needsAuthentication ? '1' : '0';
+        }
+
+        if (contentType !== undefined) {
+            headers['Content-Type'] = contentType;
         }
 
         return new Promise<ResponseType>((resolve, reject) => {

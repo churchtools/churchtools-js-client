@@ -1,5 +1,11 @@
 <!-- CHANGELOGGER -->
 
+## [1.5.0] - 2025-12-10
+
+### New feature (1 change)
+
+- The content type header can be set for post requests.
+
 ## [1.1.0] - 2021-08-03
 
 ### Bug fix (1 change)
