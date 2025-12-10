@@ -20,26 +20,19 @@ If your target application is a Node.js application, you will also need to insta
 
 ### CORS Header Configuration
 
-If you intend to connect to a ChurchTools instance from an application running in a web browser,
-any request to the ChurchTools instance is effectively a cross origin request. As a security concept the browser will
+If you intend to connect to a ChurchTools system from an application running in a web browser,
+any request to the ChurchTools system is effectively a cross origin request. As a security concept the browser will
 block these requests by default.
 
 However, the [CORS mechanism](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) can be used to allow the
-respective requests. This requires setting CORS headers on the server side.
+respective requests. This requires setting CORS headers on the server side: In your ChurchTools system go to the system
+settings > Integrations > Cross-Origin Resource Sharing and add a new entry to the Access Control Allow Origin list.
 
-If you host your ChurchTools instance on your own server, you need to enable CORS headers in your
-`churchtools.config`:
+For development that will be something like `http:/localhost:5173`. If your app is running on another web server, use
+its url like `https://your-website-where-you-use-churchtools-js-client.com`.
 
-```
-access_control_allow_origin=https://your-website-where-you-use-churchtools-js-client.com
-access_control_allow_credentials=true
-```
-
-Please refer [to the ChurchTools documentation](https://intern.church.tools/?q=churchwiki#WikiView/filterWikicategory_id:0/doc:CORS/follow_redirect:true/)
+Please refer [to the ChurchTools Academy](https://churchtools.academy/help/system-einstellungen/api/0-cors/)
 for more information.
-
-If you use the ChurchTools hosting service, please
-[contact the ChurchTools support](https://www.church.tools/de/contact) to set CORS headers.
 
 ## Usage Example
 
@@ -93,10 +86,9 @@ repository. Run `npm install` followed by `npm start` to launch the test applica
 ChurchTools API. In particular, the following functions can be used:
 
 - `setBaseUrl(baseUrl: string)`\
-  Set the URL of the ChurchTools instance you want to connect to. Please see below if you want to connect to multiple
-  instances.
+  Set the URL of the ChurchTools system you want to connect to. Please see below if you want to connect to multiple systems.
 - `validChurchToolsUrl(baseUrl: string)`\
-  Check if the URL points to an actual ChurchTools instance.
+  Check if the URL points to an actual ChurchTools system.
 - `setCookieJar(axiosCookieJarSupport, jar)`\
   Enable cookie support and automatic session handling. See the example above how to use it.
   This is only required for a Node.js application, not when running in a browser.
@@ -110,12 +102,12 @@ ChurchTools API. In particular, the following functions can be used:
   Send request to ChurchTools' legacy API.
   Please [check the documentation](https://api.church.tools/) to see what's available.
 
-## Connect to multiple ChurchTools instances simultaneously
+## Connect to multiple ChurchTools systems simultaneously
 
-If your application needs to access multiple ChurchTools instances simultaneously, you will find that
+If your application needs to access multiple ChurchTools systems simultaneously, you will find that
 `setBaseUrl` only allows to set a single URL for all following calls.
 
-Instead, an object-wrapped approach can be used to manage and call multiple instances. This is an example for a Node.js
+Instead, an object-wrapped approach can be used to manage and call multiple systems. This is an example for a Node.js
 application:
 
 ```js
