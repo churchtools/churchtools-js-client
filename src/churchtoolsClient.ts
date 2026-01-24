@@ -70,12 +70,15 @@ class ChurchToolsClient {
     constructor(churchToolsBaseUrl?: string, loginToken?: string, loadCSRFForOldApi = false) {
         this.churchToolsBaseUrl = churchToolsBaseUrl;
         this.loadCSRFForOldApi = loadCSRFForOldApi;
+        const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
         this.ax = axios.create({
             baseURL: churchToolsBaseUrl,
             withCredentials: true,
-            headers: {
-                'User-Agent': `churchtools-js-client/${packageJson.version}`,
-            },
+            headers: isBrowser
+                ? {}
+                : {
+                      'User-Agent': `churchtools-js-client/${packageJson.version}`,
+                  },
         });
 
         this.ax.interceptors.request.use(logRequest, logError);
@@ -160,7 +163,10 @@ class ChurchToolsClient {
     }
 
     setUserAgent(userAgent: string) {
-        this.ax.defaults.headers['User-Agent'] = userAgent;
+        const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+        if (!isBrowser) {
+            this.ax.defaults.headers['User-Agent'] = userAgent;
+        }
     }
 
     buildOldRequestObject(func: string, params: Params) {
