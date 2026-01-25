@@ -65,6 +65,8 @@ class ChurchToolsClient {
 
     private enforceJSON = false;
 
+    private forceSession = false;
+
     public ChurchToolsClient = ChurchToolsClient;
 
     constructor(churchToolsBaseUrl?: string, loginToken?: string, loadCSRFForOldApi = false) {
@@ -105,6 +107,16 @@ class ChurchToolsClient {
 
     setNeedsAuthentication(needsAuthentication: boolean) {
         this.needsAuthentication = needsAuthentication;
+    }
+
+    /**
+     * Sets whether to force a session on login with loginToken.
+     * When enabled, the with_session query parameter is sent to force the backend to return a session.
+     *
+     * @param {boolean} forceSession Whether to force a session on login
+     */
+    setForceSession(forceSession: boolean) {
+        this.forceSession = forceSession;
     }
 
     /**
@@ -505,19 +517,19 @@ class ChurchToolsClient {
     loginWithToken(loginToken: string, personId?: number) {
         if (!this.currentLoginPromise) {
             this.loginRunning = true;
-            this.currentLoginPromise = this.get(
-                '/whoami',
-                {
-                    login_token: loginToken,
-                    user_id: personId,
-                    no_url_rewrite: true,
-                    [CUSTOM_RETRY_PARAM]: true,
-                },
-                {
-                    rawResponse: false,
-                    callDeferred: false,
-                },
-            )
+            const params: Params = {
+                login_token: loginToken,
+                user_id: personId,
+                no_url_rewrite: true,
+                [CUSTOM_RETRY_PARAM]: true,
+            };
+            if (this.forceSession) {
+                params.with_session = true;
+            }
+            this.currentLoginPromise = this.get('/whoami', params, {
+                rawResponse: false,
+                callDeferred: false,
+            })
                 .then(() => {
                     logMessage('Successfully logged in again with login token');
                     if (this.csrfToken || !this.loadCSRFForOldApi) {
