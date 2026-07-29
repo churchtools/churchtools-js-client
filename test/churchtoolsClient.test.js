@@ -54,4 +54,29 @@ describe('churchtoolsClient', () => {
         // Verify it was overridden
         expect(ctc.ax.defaults.headers['User-Agent']).toBe(customUserAgent);
     });
+
+    it('should remove the User-Agent header from defaults and requests', async () => {
+        const client = new ChurchToolsClient('http://jest.test');
+        client.ax.defaults.adapter = async (config) => ({
+            data: {},
+            status: 200,
+            statusText: 'OK',
+            headers: {},
+            config,
+        });
+
+        client.removeUserAgent();
+
+        expect(client.ax.defaults.headers['User-Agent']).toBeUndefined();
+
+        const responseWithoutUserAgent = await client.ax.get('/user-agent-test', {
+            headers: { 'User-Agent': 'request-specific-agent/1.0.0' },
+        });
+        expect(responseWithoutUserAgent.config.headers['User-Agent']).toBeUndefined();
+
+        client.setUserAgent('restored-agent/1.0.0');
+
+        const responseWithRestoredUserAgent = await client.ax.get('/user-agent-test');
+        expect(responseWithRestoredUserAgent.config.headers['User-Agent']).toBe('restored-agent/1.0.0');
+    });
 });

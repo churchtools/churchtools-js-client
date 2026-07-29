@@ -1,5 +1,11 @@
 <!-- CHANGELOGGER -->
 
+## [Unreleased]
+
+### New feature (1 change)
+
+- Allow removing the User-Agent header from all requests.
+
 ## [1.5.0] - 2025-12-10
 
 ### New feature (1 change)
