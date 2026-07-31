@@ -52,6 +52,7 @@ class ChurchToolsClient {
     private unauthorizedInterceptorId?: number;
     private unauthenticatedCallbacks: ((info: { error?: Error; url?: string; baseUrl?: string }) => void)[] = [];
     private rateLimitInterceptorId?: number;
+    private userAgentInterceptorId?: number;
     private firstRequestStarted = false;
     private firstRequestCompleted = false;
     private loginRunning = false;
@@ -177,7 +178,21 @@ class ChurchToolsClient {
     setUserAgent(userAgent: string) {
         const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
         if (!isBrowser) {
+            if (this.userAgentInterceptorId !== undefined) {
+                this.ax.interceptors.request.eject(this.userAgentInterceptorId);
+                this.userAgentInterceptorId = undefined;
+            }
             this.ax.defaults.headers['User-Agent'] = userAgent;
+        }
+    }
+
+    removeUserAgent() {
+        delete this.ax.defaults.headers['User-Agent'];
+        if (this.userAgentInterceptorId === undefined) {
+            this.userAgentInterceptorId = this.ax.interceptors.request.use((config) => {
+                delete config.headers['User-Agent'];
+                return config;
+            });
         }
     }
 
