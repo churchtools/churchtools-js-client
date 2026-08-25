@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-08-25
+
 ### New feature (1 change)
 
 - Allow removing the User-Agent header from all requests.
