@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-09-04
+
+### New feature (1 change)
+
+- Add opt-in CSRF tokens for REST API write requests.
+
 ## [1.7.0] - 2026-08-25
 
 ### New feature (1 change)
