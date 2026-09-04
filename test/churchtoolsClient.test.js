@@ -79,4 +79,47 @@ describe('churchtoolsClient', () => {
         const responseWithRestoredUserAgent = await client.ax.get('/user-agent-test');
         expect(responseWithRestoredUserAgent.config.headers['User-Agent']).toBe('restored-agent/1.0.0');
     });
+
+    it.each([
+        ['post', (client) => client.post('/write')],
+        ['put', (client) => client.put('/write', {})],
+        ['patch', (client) => client.patch('/write')],
+        ['delete', (client) => client.deleteApi('/write')],
+    ])('should send a CSRF token for %s requests when enabled', async (_, request) => {
+        const client = new ChurchToolsClient('http://jest.test');
+        const requests = [];
+        client.ax.defaults.adapter = async (config) => {
+            requests.push(config);
+            return {
+                data: config.url.endsWith('/csrftoken') ? 'mock-csrf-token' : {},
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config,
+            };
+        };
+        client.setLoadCSRFForAPI();
+
+        await request(client);
+        await request(client);
+
+        expect(requests).toHaveLength(3);
+        expect(requests[0].url).toBe('http://jest.test/api/csrftoken');
+        expect(requests[1].headers['CSRF-Token']).toBe('mock-csrf-token');
+        expect(requests[2].headers['CSRF-Token']).toBe('mock-csrf-token');
+    });
+
+    it('should not load a CSRF token for REST requests by default', async () => {
+        const client = new ChurchToolsClient('http://jest.test');
+        const requests = [];
+        client.ax.defaults.adapter = async (config) => {
+            requests.push(config);
+            return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
+        };
+
+        await client.post('/write');
+
+        expect(requests).toHaveLength(1);
+        expect(requests[0].headers['CSRF-Token']).toBeUndefined();
+    });
 });
