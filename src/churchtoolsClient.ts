@@ -48,6 +48,7 @@ class ChurchToolsClient {
     private churchToolsBaseUrl?: string;
     private csrfToken?: string;
     private loadCSRFForOldApi: boolean;
+    private loadCSRFForApi = false;
     private ax: AxiosInstance;
     private unauthorizedInterceptorId?: number;
     private unauthenticatedCallbacks: ((info: { error?: Error; url?: string; baseUrl?: string }) => void)[] = [];
@@ -269,6 +270,21 @@ class ChurchToolsClient {
         this.loadCSRFForOldApi = true;
     }
 
+    setLoadCSRFForAPI() {
+        this.loadCSRFForApi = true;
+    }
+
+    private loadCsrfTokenIfNeeded(needsCsrfToken: boolean) {
+        if (!needsCsrfToken || this.csrfToken) {
+            return Promise.resolve();
+        }
+        return this.get<string>('/csrftoken', undefined, { callDeferred: false }).then((response) => {
+            if (typeof response === 'string') {
+                this.csrfToken = response;
+            }
+        });
+    }
+
     private checkResponse(response: AxiosResponse) {
         const enforceJSON =
             response.config?.data?.[ENFORCE_JSON_PARAM] ??
@@ -386,14 +402,22 @@ class ChurchToolsClient {
             }
 
             this.deferredExecution(() =>
-                this.ax
-                    .put(
-                        this.buildUrl(uri),
-                        {
-                            ...data,
-                            [ENFORCE_JSON_PARAM]: options?.enforceJSON,
-                        },
-                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
+                this.loadCsrfTokenIfNeeded(this.loadCSRFForApi)
+                    .then(() =>
+                        this.ax.put(
+                            this.buildUrl(uri),
+                            {
+                                ...data,
+                                [ENFORCE_JSON_PARAM]: options?.enforceJSON,
+                            },
+                            {
+                                signal: this.getAbortSignal(undefined, options.timeout),
+                                headers: {
+                                    ...headers,
+                                    ...(this.loadCSRFForApi && { 'CSRF-Token': this.csrfToken ?? '' }),
+                                },
+                            },
+                        ),
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -410,7 +434,7 @@ class ChurchToolsClient {
         // React-Native mangles the constructor.name. Therefore, another check must be applied to react-native
         const isNodeJsFormData = data && data.constructor && data.constructor.name === 'FormData';
         const isBrowserOrReactNativeFormData = globalThis.FormData && data instanceof globalThis.FormData;
-        const needsCsrfToken = isNodeJsFormData || isBrowserOrReactNativeFormData;
+        const needsCsrfToken = this.loadCSRFForApi || isNodeJsFormData || isBrowserOrReactNativeFormData;
         const needsAuthentication = options.needsAuthentication;
         const contentType = options.contentType;
 
@@ -427,14 +451,7 @@ class ChurchToolsClient {
             this.deferredExecution(() =>
                 Promise.resolve()
                     .then(() => {
-                        if (!needsCsrfToken || this.csrfToken) {
-                            return Promise.resolve();
-                        }
-                        return this.get('/csrftoken', undefined, { callDeferred: false }).then((response) => {
-                            if (typeof response === 'string') {
-                                this.csrfToken = response;
-                            }
-                        });
+                        return this.loadCsrfTokenIfNeeded(needsCsrfToken);
                     })
                     .then(() => {
                         const config: AxiosRequestConfig<Params> = {
@@ -479,14 +496,22 @@ class ChurchToolsClient {
 
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
-                this.ax
-                    .patch(
-                        this.buildUrl(uri),
-                        {
-                            ...data,
-                            [ENFORCE_JSON_PARAM]: options.enforceJSON,
-                        },
-                        { signal: this.getAbortSignal(undefined, options.timeout), headers },
+                this.loadCsrfTokenIfNeeded(this.loadCSRFForApi)
+                    .then(() =>
+                        this.ax.patch(
+                            this.buildUrl(uri),
+                            {
+                                ...data,
+                                [ENFORCE_JSON_PARAM]: options.enforceJSON,
+                            },
+                            {
+                                signal: this.getAbortSignal(undefined, options.timeout),
+                                headers: {
+                                    ...headers,
+                                    ...(this.loadCSRFForApi && { 'CSRF-Token': this.csrfToken ?? '' }),
+                                },
+                            },
+                        ),
                     )
                     .then((response) => {
                         resolve(this.responseToData(response));
@@ -508,12 +533,17 @@ class ChurchToolsClient {
 
         return new Promise<ResponseType>((resolve, reject) => {
             this.deferredExecution(() =>
-                this.ax
-                    .delete(this.buildUrl(uri), {
-                        data: { ...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON },
-                        signal: this.getAbortSignal(undefined, options?.timeout),
-                        headers,
-                    })
+                this.loadCsrfTokenIfNeeded(this.loadCSRFForApi)
+                    .then(() =>
+                        this.ax.delete(this.buildUrl(uri), {
+                            data: { ...data, [ENFORCE_JSON_PARAM]: options?.enforceJSON },
+                            signal: this.getAbortSignal(undefined, options?.timeout),
+                            headers: {
+                                ...headers,
+                                ...(this.loadCSRFForApi && { 'CSRF-Token': this.csrfToken ?? '' }),
+                            },
+                        }),
+                    )
                     .then((response) => {
                         resolve(this.responseToData(response));
                     })

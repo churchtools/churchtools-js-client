@@ -6,7 +6,7 @@ churchtools-js-client is a client written in JavaScript to easily access the
 - Easy to use abstraction of the login process which handles session cookies and automatically performs a re-login if
   the session expired (using the login token provided).
 - Supports both, the old and the new version of the ChurchTools API.
-- Automatically requests and handles the submission of CSRF tokens for the old API.
+- Automatically handles CSRF tokens for the old API and, when enabled, REST API write requests.
 - Can be used in a web application running in a browser or on server-side in a Node.js application.
 
 ## Installation
@@ -92,6 +92,8 @@ ChurchTools API. In particular, the following functions can be used:
 - `setCookieJar(axiosCookieJarSupport, jar)`\
   Enable cookie support and automatic session handling. See the example above how to use it.
   This is only required for a Node.js application, not when running in a browser.
+- `setLoadCSRFForAPI()`\
+  Automatically load and send a CSRF token for REST API write requests.
 - `get(uri: string, params: object)`\
   `post(uri: string, data: object)`\
   `put(uri: string, data: object)`\
