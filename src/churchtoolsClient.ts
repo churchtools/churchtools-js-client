@@ -434,7 +434,8 @@ class ChurchToolsClient {
         // React-Native mangles the constructor.name. Therefore, another check must be applied to react-native
         const isNodeJsFormData = data && data.constructor && data.constructor.name === 'FormData';
         const isBrowserOrReactNativeFormData = globalThis.FormData && data instanceof globalThis.FormData;
-        const needsCsrfToken = this.loadCSRFForApi || isNodeJsFormData || isBrowserOrReactNativeFormData;
+        const needsCsrfToken =
+            uri !== '/login' && (this.loadCSRFForApi || isNodeJsFormData || isBrowserOrReactNativeFormData);
         const needsAuthentication = options.needsAuthentication;
         const contentType = options.contentType;
 

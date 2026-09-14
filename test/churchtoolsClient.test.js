@@ -122,4 +122,20 @@ describe('churchtoolsClient', () => {
         expect(requests).toHaveLength(1);
         expect(requests[0].headers['CSRF-Token']).toBeUndefined();
     });
+
+    it('should not load a CSRF token for login requests', async () => {
+        const client = new ChurchToolsClient('http://jest.test');
+        const requests = [];
+        client.ax.defaults.adapter = async (config) => {
+            requests.push(config);
+            return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
+        };
+        client.setLoadCSRFForAPI();
+
+        await client.post('/login');
+
+        expect(requests).toHaveLength(1);
+        expect(requests[0].url).toBe('http://jest.test/api/login');
+        expect(requests[0].headers['CSRF-Token']).toBeUndefined();
+    });
 });
