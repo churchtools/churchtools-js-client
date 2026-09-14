@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.7.2] - 2026-09-14
+
+### Bug fix (1 change)
+
+- Exclude login requests from REST API CSRF token loading.
+
 ## [1.7.1] - 2026-09-04
 
 ### New feature (1 change)
