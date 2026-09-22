@@ -1,0 +1,26 @@
+{
+  "name": "churchtools-js-client-demo-ts",
+  "version": "1.0.0",
+  "description": "Simple demo application for churchtools-js-client written in TypeScript",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "npm run generate-types && tsc",
+    "start": "npm run build && node build/index.js",
+    "dev": "tsx src/index.ts",
+    "generate-types": "openapi-typescript <YOUR_BASE_URL>/system/runtime/swagger/openapi.json -o ./src/types/churchtools-api.ts"
+  },
+  "author": "Darius Kletter",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@churchtools/churchtools-client": "^1.6.0",
+    "axios-cookiejar-support": "^4.0.0",
+    "dotenv": "^16.6.1",
+    "tough-cookie": "^4.0.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "@types/node": "^24.10.13",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
