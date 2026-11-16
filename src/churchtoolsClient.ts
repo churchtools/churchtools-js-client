@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { logRequest, logResponse, logError, logMessage, logWarning } from './logging';
 import { toCorrectChurchToolsUrl } from './urlHelper';
 import { NoJSONError } from './NoJSONError';
@@ -59,6 +59,7 @@ class ChurchToolsClient {
     private loginRunning = false;
     private deferredRequestCallbacks: (() => void)[] = [];
     private requestTimeout = DEFAULT_TIMEOUT;
+    private timedOutSignals = new WeakSet<object>();
     private rateLimitTimeout = RATE_LIMIT_TIMEOUT;
     private currentLoginPromise?: Promise<any>;
 
@@ -83,6 +84,21 @@ class ChurchToolsClient {
                 : {
                       'User-Agent': `churchtools-js-client/${packageJson.version}`,
                   },
+        });
+
+        // Axios reports AbortController deadlines as cancellations, just like explicit aborts.
+        this.ax.interceptors.response.use(undefined, (error: unknown) => {
+            if (
+                axios.isAxiosError(error) &&
+                error.code === AxiosError.ERR_CANCELED &&
+                error.config?.signal &&
+                this.timedOutSignals.has(error.config.signal)
+            ) {
+                return Promise.reject(
+                    new AxiosError('Request timed out', AxiosError.ETIMEDOUT, error.config, error.request),
+                );
+            }
+            return Promise.reject(error);
         });
 
         this.ax.interceptors.request.use(logRequest, logError);
@@ -211,7 +227,10 @@ class ChurchToolsClient {
 
     getAbortSignal(abortController: AbortController = new AbortController(), timeout?: number) {
         setTimeout(() => {
-            abortController.abort();
+            if (!abortController.signal.aborted) {
+                this.timedOutSignals.add(abortController.signal);
+                abortController.abort();
+            }
         }, timeout ?? this.requestTimeout);
         return abortController.signal;
     }

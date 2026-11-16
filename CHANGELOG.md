@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Bug fix (1 change)
+
+- Report expired request deadlines as `ETIMEDOUT` instead of cancellation errors, while preserving explicit cancellations.
+
 ## [1.7.2] - 2026-09-14
 
 ### Bug fix (1 change)
