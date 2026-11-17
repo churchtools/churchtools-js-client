@@ -59,7 +59,7 @@ class ChurchToolsClient {
     private loginRunning = false;
     private deferredRequestCallbacks: (() => void)[] = [];
     private requestTimeout = DEFAULT_TIMEOUT;
-    private timedOutSignals = new WeakSet<object>();
+    private requestTimeouts = new WeakMap<object, { timer: ReturnType<typeof setTimeout>; timedOut: boolean }>();
     private rateLimitTimeout = RATE_LIMIT_TIMEOUT;
     private currentLoginPromise?: Promise<any>;
 
@@ -87,19 +87,28 @@ class ChurchToolsClient {
         });
 
         // Axios reports AbortController deadlines as cancellations, just like explicit aborts.
-        this.ax.interceptors.response.use(undefined, (error: unknown) => {
-            if (
-                axios.isAxiosError(error) &&
-                error.code === AxiosError.ERR_CANCELED &&
-                error.config?.signal &&
-                this.timedOutSignals.has(error.config.signal)
-            ) {
-                return Promise.reject(
-                    new AxiosError('Request timed out', AxiosError.ETIMEDOUT, error.config, error.request),
-                );
-            }
-            return Promise.reject(error);
-        });
+        this.ax.interceptors.response.use(
+            (response) => {
+                this.clearRequestTimeout(response.config.signal);
+                return response;
+            },
+            (error: unknown) => {
+                if (axios.isAxiosError(error)) {
+                    const timedOut = this.clearRequestTimeout(error.config?.signal);
+                    if (error.code === AxiosError.ERR_CANCELED && timedOut) {
+                        const timeoutError = new AxiosError(
+                            'Request timed out',
+                            AxiosError.ETIMEDOUT,
+                            error.config,
+                            error.request,
+                        );
+                        timeoutError.cause = error;
+                        return Promise.reject(timeoutError);
+                    }
+                }
+                return Promise.reject(error);
+            },
+        );
 
         this.ax.interceptors.request.use(logRequest, logError);
         this.ax.interceptors.response.use((response) => {
@@ -226,13 +235,28 @@ class ChurchToolsClient {
     }
 
     getAbortSignal(abortController: AbortController = new AbortController(), timeout?: number) {
-        setTimeout(() => {
-            if (!abortController.signal.aborted) {
-                this.timedOutSignals.add(abortController.signal);
-                abortController.abort();
-            }
-        }, timeout ?? this.requestTimeout);
+        this.clearRequestTimeout(abortController.signal);
+        const timeoutState = {
+            timer: setTimeout(() => {
+                if (!abortController.signal.aborted) {
+                    timeoutState.timedOut = true;
+                    abortController.abort();
+                }
+            }, timeout ?? this.requestTimeout),
+            timedOut: false,
+        };
+        this.requestTimeouts.set(abortController.signal, timeoutState);
         return abortController.signal;
+    }
+
+    private clearRequestTimeout(signal?: object) {
+        const timeoutState = signal && this.requestTimeouts.get(signal);
+        if (!timeoutState) {
+            return false;
+        }
+        clearTimeout(timeoutState.timer);
+        this.requestTimeouts.delete(signal);
+        return timeoutState.timedOut;
     }
 
     /**
